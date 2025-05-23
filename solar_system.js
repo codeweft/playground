@@ -257,7 +257,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const mars = new THREE.Mesh(marsGeometry, marsMaterial);
     mars.position.x = 25;
     marsOrbit.add(mars);
-    planets.push({ mesh: mars, orbit: marsOrbit, speed: 0.004, rotationSpeed: 0.025 });
+    mars.name = "Mars"; // For potential future lookup
+
+    // Phobos (Mars's Moon)
+    const phobosOrbitPivot = new THREE.Object3D();
+    mars.add(phobosOrbitPivot); 
+    const phobosRadius = 0.06;
+    const phobosGeometry = new THREE.SphereGeometry(phobosRadius, 8, 8);
+    const phobosMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 }); // Fallback dark grey
+    const phobosTextureURL = 'https://raw.githubusercontent.com/CoryG89/Solar-System/master/textures/phobos_1k_color.jpg';
+    textureLoader.load(phobosTextureURL, function(texture) {
+        phobosMaterial.map = texture;
+        phobosMaterial.needsUpdate = true;
+        console.log('Phobos texture loaded.');
+    }, undefined, function(err) { console.error('Error loading Phobos texture:', err); });
+    const phobos = new THREE.Mesh(phobosGeometry, phobosMaterial);
+    phobos.position.x = 0.5; // Distance from Mars
+    phobosOrbitPivot.add(phobos);
+
+    // Deimos (Mars's Moon)
+    const deimosOrbitPivot = new THREE.Object3D();
+    mars.add(deimosOrbitPivot);
+    const deimosRadius = 0.03;
+    const deimosGeometry = new THREE.SphereGeometry(deimosRadius, 8, 8);
+    const deimosMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 }); // Fallback lighter grey
+    const deimosTextureURL = 'https://raw.githubusercontent.com/CoryG89/Solar-System/master/textures/deimos_1k_color.jpg';
+    textureLoader.load(deimosTextureURL, function(texture) {
+        deimosMaterial.map = texture;
+        deimosMaterial.needsUpdate = true;
+        console.log('Deimos texture loaded.');
+    }, undefined, function(err) { console.error('Error loading Deimos texture:', err); });
+    const deimos = new THREE.Mesh(deimosGeometry, deimosMaterial);
+    deimos.position.x = 0.9; // Distance from Mars
+    deimosOrbitPivot.add(deimos);
+
+    planets.push({
+        mesh: mars,
+        orbit: marsOrbit,
+        speed: 0.004,
+        rotationSpeed: 0.025,
+        marsMoons: [
+            { name: "Phobos", mesh: phobos, orbitPivot: phobosOrbitPivot, speed: 0.08, rotationSpeed: 0.01 },
+            { name: "Deimos", mesh: deimos, orbitPivot: deimosOrbitPivot, speed: 0.04, rotationSpeed: 0.01 }
+        ]
+    });
 
     // Jupiter
     const jupiterOrbit = new THREE.Object3D();
@@ -274,7 +317,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const jupiter = new THREE.Mesh(jupiterGeometry, jupiterMaterial);
     jupiter.position.x = 35;
     jupiterOrbit.add(jupiter);
-    planets.push({ mesh: jupiter, orbit: jupiterOrbit, speed: 0.002, rotationSpeed: 0.01 });
+    jupiter.name = "Jupiter"; // For potential future lookup
+
+    // Jupiter's Galilean Moons
+    const galileanMoonsData = [
+        { name: "Io", radius: 0.25, distance: 5, speed: 0.04, rotationSpeed: 0.02, color: 0xFFFF99, textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_io.jpg' },
+        { name: "Europa", radius: 0.22, distance: 7, speed: 0.03, rotationSpeed: 0.018, color: 0xADD8E6, textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_europa.jpg' },
+        { name: "Ganymede", radius: 0.38, distance: 9, speed: 0.02, rotationSpeed: 0.015, color: 0xA9A9A9, textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_ganymede.jpg' },
+        { name: "Callisto", radius: 0.35, distance: 12, speed: 0.01, rotationSpeed: 0.01, color: 0x696969, textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_callisto.jpg' }
+    ];
+
+    const jupiterMoonsArray = [];
+
+    galileanMoonsData.forEach(moonData => {
+        const moonOrbitPivot = new THREE.Object3D();
+        jupiter.add(moonOrbitPivot);
+
+        const moonGeometry = new THREE.SphereGeometry(moonData.radius, 16, 16);
+        const moonMaterial = new THREE.MeshStandardMaterial({ color: moonData.color });
+
+        textureLoader.load(moonData.textureUrl, function(texture) {
+            moonMaterial.map = texture;
+            moonMaterial.needsUpdate = true;
+            console.log(moonData.name + ' texture loaded.');
+        }, undefined, function(err) {
+            console.error('Error loading ' + moonData.name + ' texture. Using fallback color.');
+        });
+
+        const moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+        moonMesh.position.x = moonData.distance;
+        moonOrbitPivot.add(moonMesh);
+
+        jupiterMoonsArray.push({
+            name: moonData.name,
+            mesh: moonMesh,
+            orbitPivot: moonOrbitPivot,
+            speed: moonData.speed,
+            rotationSpeed: moonData.rotationSpeed
+        });
+    });
+
+    planets.push({
+        mesh: jupiter,
+        orbit: jupiterOrbit,
+        speed: 0.002,
+        rotationSpeed: 0.01,
+        jovianMoons: jupiterMoonsArray // Add Galilean moons to Jupiter's data
+    });
    
     // Saturn
     const saturnOrbit = new THREE.Object3D();
@@ -291,24 +380,72 @@ document.addEventListener('DOMContentLoaded', () => {
     const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
     saturn.position.x = 45; 
     saturnOrbit.add(saturn); 
+    saturn.name = "Saturn";
     
     const ringGeometry = new THREE.RingGeometry(3.5, 6, 64); // InnerR, OuterR, Segments
-    // Using MeshBasicMaterial for rings for simplicity with transparency.
-    // Base color set to white to let texture define color.
     const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true });
     textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_saturn_ring_alpha.png', function(texture) {
-        ringMaterial.map = texture; // Use texture for color
-        ringMaterial.alphaMap = texture; // Use texture's alpha channel for transparency
+        ringMaterial.map = texture; 
+        ringMaterial.alphaMap = texture; 
         ringMaterial.needsUpdate = true;
         console.log('Saturn Rings texture loaded.');
     }, undefined, function(err) {
         console.error('Error loading Saturn Rings texture:', err);
     });
     const saturnRings = new THREE.Mesh(ringGeometry, ringMaterial);
-    saturnRings.rotation.x = Math.PI / 2.5; // Tilt the rings
-    saturnRings.position.x = 0; // Rings are centered on Saturn's mesh
-    saturn.add(saturnRings); // Add rings as a child of Saturn's mesh
-    planets.push({ mesh: saturn, orbit: saturnOrbit, speed: 0.001, rotationSpeed: 0.009, rings: saturnRings });
+    saturnRings.rotation.x = Math.PI / 2.5; 
+    saturnRings.position.x = 0; 
+    saturn.add(saturnRings); 
+
+    // Saturn's Moons
+    const saturnMoonsData = [
+        { name: "Titan", radius: 0.4, distance: 8, speed: 0.015, rotationSpeed: 0.005, color: 0xFFBF00, textureUrl: 'https://www.solarsystemscope.com/textures/download/2k_titan.jpg' },
+        { name: "Rhea", radius: 0.12, distance: 6.5, speed: 0.025, rotationSpeed: 0.008, color: 0xB0C4DE, textureUrl: 'https://raw.githubusercontent.com/Stellarium/stellarium/master/skycultures/western_SnT/maptex/rhea.png' },
+        { name: "Enceladus", radius: 0.04, distance: 4.5, speed: 0.04, rotationSpeed: 0.01, color: 0xFFFFFF, textureUrl: 'https://raw.githubusercontent.com/Stellarium/stellarium/master/skycultures/western_SnT/maptex/enceladus.png' }
+    ];
+
+    const saturnMoonsArray = [];
+
+    saturnMoonsData.forEach(moonData => {
+        const orbitPivot = new THREE.Object3D();
+        saturn.add(orbitPivot); 
+
+        const geometry = new THREE.SphereGeometry(moonData.radius, 16, 16);
+        const material = new THREE.MeshStandardMaterial({ color: moonData.color });
+
+        if (moonData.textureUrl) {
+            textureLoader.load(moonData.textureUrl, function(texture) {
+                material.map = texture;
+                material.needsUpdate = true;
+                console.log(moonData.name + ' texture loaded.');
+            }, undefined, function(err) {
+                console.error('Error loading ' + moonData.name + ' texture. Using fallback color.');
+            });
+        } else {
+            console.log('No textureUrl provided for ' + moonData.name + ', using fallback color.');
+        }
+
+        const moonMesh = new THREE.Mesh(geometry, material);
+        moonMesh.position.x = moonData.distance;
+        orbitPivot.add(moonMesh);
+
+        saturnMoonsArray.push({
+            name: moonData.name,
+            mesh: moonMesh,
+            orbitPivot: orbitPivot,
+            speed: moonData.speed,
+            rotationSpeed: moonData.rotationSpeed
+        });
+    });
+    
+    planets.push({ 
+        mesh: saturn, 
+        orbit: saturnOrbit, 
+        speed: 0.001, 
+        rotationSpeed: 0.009, 
+        rings: saturnRings, 
+        saturnianMoons: saturnMoonsArray // Add Saturn's moons
+    });
 
     // Uranus
     const uranusOrbit = new THREE.Object3D();

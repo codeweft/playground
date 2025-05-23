@@ -13,12 +13,16 @@ This project displays an animated 3D model of our solar system in the browser us
 *   **Pause/Resume Orbit:** Ability to pause and resume the orbital movement of planets and moons via an on-screen button.
 *   **Basic Lighting:** A point light source emanates from the Sun, illuminating the planets, complemented by ambient light.
 *   **Starfield Background:** A dynamic starfield provides a backdrop for the solar system (using a texture or procedural generation).
+*   **Detailed Moons:** Many planets now feature their major moons:
+    *   **Earth:** Accompanied by its Moon, featuring a detailed bump map and orbiting Earth.
+    *   **Mars:** Features its two moons, Phobos and Deimos, with textures and orbits.
+    *   **Jupiter:** Includes its four Galilean moons (Io, Europa, Ganymede, Callisto), each with unique textures and orbital patterns.
+    *   **Saturn:** A selection of its major moons (Titan, Rhea, Enceladus) are represented with textures and orbits.
 *   **Textured Celestial Bodies:** The Sun and planets are rendered with textures for a more realistic appearance.
-    *   **Enhanced Earth Details:**
-        *   **Dynamic Clouds:** A transparent cloud layer, with its own rotation, adds atmospheric depth.
-        *   **City Lights:** An emissive map vividly displays city lights on Earth's night side.
-        *   **Surface Realism:** Specular (roughness) and normal/bump maps provide a more detailed surface appearance with varied reflectivity and the illusion of terrain.
-    *   **Enhanced Moon Details:** Earth's Moon orbits with an added bump map, enhancing crater and surface definition.
+*   **Enhanced Earth Details:**
+    *   **Dynamic Clouds:** A transparent cloud layer, with its own rotation, adds atmospheric depth.
+    *   **City Lights:** An emissive map vividly displays city lights on Earth's night side.
+    *   **Surface Realism:** Specular (roughness) and normal/bump maps provide a more detailed surface appearance with varied reflectivity and the illusion of terrain.
 
 ## How to View
 
