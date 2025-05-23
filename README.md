@@ -10,7 +10,10 @@ This project displays an animated 3D model of our solar system in the browser us
     *   Orbit the camera around the solar system.
     *   Zoom in and out.
     *   Pan the view.
-*   **Basic Lighting:** A point light source emanates from the Sun, illuminating the planets.
+*   **Basic Lighting:** A point light source emanates from the Sun, illuminating the planets, complemented by ambient light.
+*   **Starfield Background:** A dynamic starfield provides a backdrop for the solar system (using a texture or procedural generation).
+*   **Textured Celestial Bodies:** The Sun, planets, and Earth's Moon are rendered with textures for a more realistic appearance.
+*   **Earth's Moon:** Earth is accompanied by its Moon, which orbits it.
 
 ## How to View
 

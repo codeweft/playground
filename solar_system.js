@@ -6,6 +6,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // Scene
     const scene = new THREE.Scene();
 
+    // Starfield
+    const textureLoader = new THREE.TextureLoader();
+    // Attempt to use a real texture URL found by the worker.
+    // Fallback to a simple procedural method if no texture can be loaded or found.
+    const starTextureUrl = 'https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg'; // Worker can replace this
+
+    textureLoader.load(starTextureUrl, function(texture) {
+        const starfieldGeometry = new THREE.SphereGeometry(500, 64, 64); // Large sphere
+        const starfieldMaterial = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.BackSide
+        });
+        const starfield = new THREE.Mesh(starfieldGeometry, starfieldMaterial);
+        scene.add(starfield);
+        console.log('Starfield added with texture.');
+    }, undefined, function(err) {
+        console.error('Failed to load star texture, creating procedural starfield:', err);
+        // Fallback: Procedural starfield (many small points)
+        const starVertices = [];
+        for (let i = 0; i < 10000; i++) {
+            const x = THREE.MathUtils.randFloatSpread(2000); // Spread them out
+            const y = THREE.MathUtils.randFloatSpread(2000);
+            const z = THREE.MathUtils.randFloatSpread(2000);
+            // Only add if far enough to form a sphere-like distribution
+            if (Math.sqrt(x*x + y*y + z*z) > 800) { // Ensure they are distant
+                 starVertices.push(x, y, z);
+            }
+        }
+        const starsGeometry = new THREE.BufferGeometry();
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        const starsMaterial = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 1.5 });
+        const proceduralStarfield = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(proceduralStarfield);
+        console.log('Procedural starfield added.');
+    });
+
     // Camera
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 70; // Adjusted camera for better overview
@@ -17,7 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sun
     const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
-    const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+    const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 }); // Fallback color
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_sun.jpg', function(texture) {
+        sunMaterial.map = texture;
+        sunMaterial.needsUpdate = true;
+        console.log('Sun texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Sun texture:', err);
+    });
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
     scene.add(sun);
 
@@ -44,7 +87,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const mercuryOrbit = new THREE.Object3D();
     scene.add(mercuryOrbit);
     const mercuryGeometry = new THREE.SphereGeometry(0.5, 32, 32);
-    const mercuryMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
+    const mercuryMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 }); // Fallback color
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_mercury.jpg', function(texture) {
+        mercuryMaterial.map = texture;
+        mercuryMaterial.needsUpdate = true;
+        console.log('Mercury texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Mercury texture:', err);
+    });
     const mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
     mercury.position.x = 10;
     mercuryOrbit.add(mercury);
@@ -54,7 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const venusOrbit = new THREE.Object3D();
     scene.add(venusOrbit);
     const venusGeometry = new THREE.SphereGeometry(0.9, 32, 32);
-    const venusMaterial = new THREE.MeshStandardMaterial({ color: 0xFFE4B5 });
+    const venusMaterial = new THREE.MeshStandardMaterial({ color: 0xFFE4B5 }); // Fallback color
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_venus_surface.jpg', function(texture) {
+        venusMaterial.map = texture;
+        venusMaterial.needsUpdate = true;
+        console.log('Venus texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Venus texture:', err);
+    });
     const venus = new THREE.Mesh(venusGeometry, venusMaterial);
     venus.position.x = 15;
     venusOrbit.add(venus);
@@ -64,17 +121,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const earthOrbit = new THREE.Object3D();
     scene.add(earthOrbit);
     const earthGeometry = new THREE.SphereGeometry(1, 32, 32);
-    const earthMaterial = new THREE.MeshStandardMaterial({ color: 0x4682B4 });
+    const earthMaterial = new THREE.MeshStandardMaterial({ color: 0x4682B4 }); // Fallback color
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_earth_daymap.jpg', function(texture) {
+        earthMaterial.map = texture;
+        earthMaterial.needsUpdate = true;
+        console.log('Earth texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Earth texture:', err);
+    });
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
     earth.position.x = 20;
     earthOrbit.add(earth);
-    planets.push({ mesh: earth, orbit: earthOrbit, speed: 0.005, rotationSpeed: 0.02 });
+
+    // Earth's Moon
+    const moonOrbitPivot = new THREE.Object3D(); // Pivot for Moon's orbit around Earth
+    earth.add(moonOrbitPivot); // Add Moon's orbit pivot as a child of Earth's mesh
+
+    const moonRadius = 0.27; // Relative to Earth's radius of 1
+    const moonDistance = 3;  // Distance from Earth
+    const moonGeometry = new THREE.SphereGeometry(moonRadius, 16, 16); // Smaller sphere, less segments
+    const moonMaterial = new THREE.MeshStandardMaterial({ color: 0xCCCCCC }); // Fallback grey
+
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_moon.jpg', function(texture) {
+        moonMaterial.map = texture;
+        moonMaterial.needsUpdate = true;
+        console.log('Moon texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Moon texture:', err);
+    });
+
+    const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+    moon.position.x = moonDistance; // Position relative to moonOrbitPivot (which is at Earth's center)
+    moonOrbitPivot.add(moon); // Add Moon mesh to its pivot
+
+    planets.push({
+        mesh: earth,
+        orbit: earthOrbit,
+        speed: 0.005,
+        rotationSpeed: 0.02,
+        moonOrbitPivot: moonOrbitPivot, // Add this
+        moonOrbitSpeed: 0.05 // Speed of Moon's orbit around Earth
+    });
 
     // Mars
     const marsOrbit = new THREE.Object3D();
     scene.add(marsOrbit);
     const marsGeometry = new THREE.SphereGeometry(0.7, 32, 32);
-    const marsMaterial = new THREE.MeshStandardMaterial({ color: 0xFF4500 });
+    const marsMaterial = new THREE.MeshStandardMaterial({ color: 0xFF4500 }); // Fallback color
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_mars.jpg', function(texture) {
+        marsMaterial.map = texture;
+        marsMaterial.needsUpdate = true;
+        console.log('Mars texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Mars texture:', err);
+    });
     const mars = new THREE.Mesh(marsGeometry, marsMaterial);
     mars.position.x = 25;
     marsOrbit.add(mars);
@@ -84,7 +184,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const jupiterOrbit = new THREE.Object3D();
     scene.add(jupiterOrbit);
     const jupiterGeometry = new THREE.SphereGeometry(3.5, 32, 32);
-    const jupiterMaterial = new THREE.MeshStandardMaterial({ color: 0xD2B48C });
+    const jupiterMaterial = new THREE.MeshStandardMaterial({ color: 0xD2B48C }); // Fallback color
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_jupiter.jpg', function(texture) {
+        jupiterMaterial.map = texture;
+        jupiterMaterial.needsUpdate = true;
+        console.log('Jupiter texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Jupiter texture:', err);
+    });
     const jupiter = new THREE.Mesh(jupiterGeometry, jupiterMaterial);
     jupiter.position.x = 35;
     jupiterOrbit.add(jupiter);
@@ -94,14 +201,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const saturnOrbit = new THREE.Object3D();
     scene.add(saturnOrbit);
     const saturnGeometry = new THREE.SphereGeometry(3, 32, 32);
-    const saturnMaterial = new THREE.MeshStandardMaterial({ color: 0xF0E68C });
+    const saturnMaterial = new THREE.MeshStandardMaterial({ color: 0xF0E68C }); // Fallback color
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_saturn.jpg', function(texture) {
+        saturnMaterial.map = texture;
+        saturnMaterial.needsUpdate = true;
+        console.log('Saturn texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Saturn texture:', err);
+    });
     const saturn = new THREE.Mesh(saturnGeometry, saturnMaterial);
     saturn.position.x = 45; 
     saturnOrbit.add(saturn); 
     
     const ringGeometry = new THREE.RingGeometry(3.5, 6, 64); // InnerR, OuterR, Segments
-    // Using MeshStandardMaterial for rings as well for consistent lighting
-    const ringMaterial = new THREE.MeshStandardMaterial({ color: 0xAAA08C, side: THREE.DoubleSide, metalness: 0.3, roughness: 0.8 });
+    // Using MeshBasicMaterial for rings for simplicity with transparency.
+    // Base color set to white to let texture define color.
+    const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true });
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_saturn_ring_alpha.png', function(texture) {
+        ringMaterial.map = texture; // Use texture for color
+        ringMaterial.alphaMap = texture; // Use texture's alpha channel for transparency
+        ringMaterial.needsUpdate = true;
+        console.log('Saturn Rings texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Saturn Rings texture:', err);
+    });
     const saturnRings = new THREE.Mesh(ringGeometry, ringMaterial);
     saturnRings.rotation.x = Math.PI / 2.5; // Tilt the rings
     saturnRings.position.x = 0; // Rings are centered on Saturn's mesh
@@ -112,7 +235,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const uranusOrbit = new THREE.Object3D();
     scene.add(uranusOrbit);
     const uranusGeometry = new THREE.SphereGeometry(2, 32, 32);
-    const uranusMaterial = new THREE.MeshStandardMaterial({ color: 0xAFEEEE });
+    const uranusMaterial = new THREE.MeshStandardMaterial({ color: 0xAFEEEE }); // Fallback color
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_uranus.jpg', function(texture) {
+        uranusMaterial.map = texture;
+        uranusMaterial.needsUpdate = true;
+        console.log('Uranus texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Uranus texture:', err);
+    });
     const uranus = new THREE.Mesh(uranusGeometry, uranusMaterial);
     uranus.position.x = 55;
     uranusOrbit.add(uranus);
@@ -122,7 +252,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const neptuneOrbit = new THREE.Object3D();
     scene.add(neptuneOrbit);
     const neptuneGeometry = new THREE.SphereGeometry(1.9, 32, 32);
-    const neptuneMaterial = new THREE.MeshStandardMaterial({ color: 0x3F51B5 });
+    const neptuneMaterial = new THREE.MeshStandardMaterial({ color: 0x3F51B5 }); // Fallback color
+    textureLoader.load('https://www.solarsystemscope.com/textures/download/2k_neptune.jpg', function(texture) {
+        neptuneMaterial.map = texture;
+        neptuneMaterial.needsUpdate = true;
+        console.log('Neptune texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Neptune texture:', err);
+    });
     const neptune = new THREE.Mesh(neptuneGeometry, neptuneMaterial);
     neptune.position.x = 65;
     neptuneOrbit.add(neptune);
@@ -139,6 +276,10 @@ document.addEventListener('DOMContentLoaded', () => {
         planets.forEach(p => {
             p.orbit.rotation.y += p.speed;       // Orbital movement
             p.mesh.rotation.y += p.rotationSpeed; // Axial rotation
+
+            if (p.moonOrbitPivot) {
+                p.moonOrbitPivot.rotation.y += p.moonOrbitSpeed; // Moon's orbit around the planet
+            }
         });
 
         controls.update(); // Update controls in the animation loop
