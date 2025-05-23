@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fallback to a simple procedural method if no texture can be loaded or found.
     const starTextureUrl = 'https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg'; // Worker can replace this
 
+    let isOrbitPaused = false; // Variable to control orbital pause state
+
     textureLoader.load(starTextureUrl, function(texture) {
         const starfieldGeometry = new THREE.SphereGeometry(500, 64, 64); // Large sphere
         const starfieldMaterial = new THREE.MeshBasicMaterial({
@@ -351,14 +353,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Planets animation
         planets.forEach(p => {
-            p.orbit.rotation.y += p.speed;       // Orbital movement
-            p.mesh.rotation.y += p.rotationSpeed; // Axial rotation
+            // Axial rotation (continues regardless of pause)
+            p.mesh.rotation.y += p.rotationSpeed;
 
-            if (p.moonOrbitPivot) {
-                p.moonOrbitPivot.rotation.y += p.moonOrbitSpeed; // Moon's orbit around the planet
-            }
+            // Cloud rotation (continues regardless of pause, if applicable)
             if (p.clouds && p.cloudSpeed) {
-                p.clouds.rotation.y += p.cloudSpeed; // Cloud layer rotation
+                p.clouds.rotation.y += p.cloudSpeed;
+            }
+
+            // Orbital movements (pauseable)
+            if (!isOrbitPaused) {
+                p.orbit.rotation.y += p.speed; // Planet's orbit around Sun
+
+                if (p.moonOrbitPivot && p.moonOrbitSpeed) { // Check moonOrbitSpeed as well
+                    p.moonOrbitPivot.rotation.y += p.moonOrbitSpeed; // Moon's orbit around the planet
+                }
             }
         });
 
@@ -378,4 +387,21 @@ document.addEventListener('DOMContentLoaded', () => {
     animate();
 
     console.log('Three.js setup complete with orbital and axial rotation.');
+
+    // Event listener for the pause button
+    const pauseButton = document.getElementById('pauseOrbitButton');
+    if (pauseButton) {
+        pauseButton.addEventListener('click', () => {
+            isOrbitPaused = !isOrbitPaused; // Toggle the pause state
+
+            if (isOrbitPaused) {
+                pauseButton.textContent = 'Resume Orbit';
+            } else {
+                pauseButton.textContent = 'Pause Orbit';
+            }
+            console.log('Orbit pause state:', isOrbitPaused); // For debugging
+        });
+    } else {
+        console.error('Pause button not found in the DOM.');
+    }
 });

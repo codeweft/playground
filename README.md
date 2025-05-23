@@ -10,6 +10,7 @@ This project displays an animated 3D model of our solar system in the browser us
     *   Orbit the camera around the solar system.
     *   Zoom in and out.
     *   Pan the view.
+*   **Pause/Resume Orbit:** Ability to pause and resume the orbital movement of planets and moons via an on-screen button.
 *   **Basic Lighting:** A point light source emanates from the Sun, illuminating the planets, complemented by ambient light.
 *   **Starfield Background:** A dynamic starfield provides a backdrop for the solar system (using a texture or procedural generation).
 *   **Textured Celestial Bodies:** The Sun and planets are rendered with textures for a more realistic appearance.
