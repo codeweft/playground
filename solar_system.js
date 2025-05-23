@@ -129,9 +129,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }, undefined, function(err) {
         console.error('Error loading Earth texture:', err);
     });
+
+    // Load Earth's night map (city lights)
+    const nightTextureURL = 'https://www.solarsystemscope.com/textures/download/2k_earth_nightmap.jpg';
+    textureLoader.load(nightTextureURL, function(texture) {
+        earthMaterial.emissiveMap = texture;
+        earthMaterial.emissive = new THREE.Color(0xffffff); // Use texture's colors for emission
+        earthMaterial.emissiveIntensity = 1.0; // Adjust brightness as needed
+        earthMaterial.needsUpdate = true;
+        console.log('Earth night map texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Earth night map texture:', err);
+    });
+
+    // Load Earth's specular/roughness map
+    const specularTextureURL = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/297733/earthspec1k.jpg';
+    textureLoader.load(specularTextureURL, function(texture) {
+        earthMaterial.roughnessMap = texture;
+        earthMaterial.roughness = 0.7; // Base roughness, map will modulate this.
+        earthMaterial.metalness = 0.1; // Earth is mostly non-metallic.
+        earthMaterial.needsUpdate = true;
+        console.log('Earth specular/roughness map texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Earth specular/roughness map texture:', err);
+    });
+
+    // Attempt to load Normal Map for Earth
+    const normalMapURL = 'https://raw.githubusercontent.com/TarekRaafat/three.js-earth/master/src/textures/earth_normal_map.png';
+    textureLoader.load(normalMapURL, function(normalTexture) {
+        earthMaterial.normalMap = normalTexture;
+        earthMaterial.normalScale = new THREE.Vector2(0.7, 0.7); // Adjust for strength
+        earthMaterial.needsUpdate = true;
+        console.log('Earth normal map texture loaded.');
+    }, undefined, function(err_normal) {
+        console.error('Error loading Earth normal map, trying bump map:', err_normal);
+
+        // Fallback to Bump Map if Normal Map fails
+        const bumpMapURL = 'https://raw.githubusercontent.com/TarekRaafat/three.js-earth/master/src/textures/earth_bump_map.png';
+        textureLoader.load(bumpMapURL, function(bumpTexture) {
+            earthMaterial.bumpMap = bumpTexture;
+            earthMaterial.bumpScale = 0.05; // Adjust for subtle effect
+            earthMaterial.needsUpdate = true;
+            console.log('Earth bump map texture loaded.');
+        }, undefined, function(err_bump) {
+            console.error('Error loading Earth bump map:', err_bump);
+        });
+    });
+
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
     earth.position.x = 20;
     earthOrbit.add(earth);
+
+    // Earth's Clouds
+    const cloudGeometry = new THREE.SphereGeometry(earth.geometry.parameters.radius * 1.02, 32, 32);
+    const cloudMaterial = new THREE.MeshPhongMaterial({
+        transparent: true,
+        // depthWrite: false // Optional based on sorting needs
+    });
+    const cloudTextureURL = 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png';
+    textureLoader.load(cloudTextureURL, function(texture) {
+        cloudMaterial.map = texture;
+        cloudMaterial.needsUpdate = true;
+        console.log('Earth cloud texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Earth cloud texture:', err);
+    });
+    const earthClouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+    earth.add(earthClouds); // Add clouds as a child of Earth mesh
 
     // Earth's Moon
     const moonOrbitPivot = new THREE.Object3D(); // Pivot for Moon's orbit around Earth
@@ -150,6 +214,17 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error loading Moon texture:', err);
     });
 
+    // Load Moon's bump map
+    const moonBumpMapURL = 'https://cortex.engr.illinois.edu/cs418/NETID_FinalProject/Assets/Textures/planets/moon_bump.png';
+    textureLoader.load(moonBumpMapURL, function(texture) {
+        moonMaterial.bumpMap = texture;
+        moonMaterial.bumpScale = 0.03; // Subtle crater/surface detail
+        moonMaterial.needsUpdate = true;
+        console.log('Moon bump map texture loaded.');
+    }, undefined, function(err) {
+        console.error('Error loading Moon bump map texture:', err);
+    });
+
     const moon = new THREE.Mesh(moonGeometry, moonMaterial);
     moon.position.x = moonDistance; // Position relative to moonOrbitPivot (which is at Earth's center)
     moonOrbitPivot.add(moon); // Add Moon mesh to its pivot
@@ -159,8 +234,10 @@ document.addEventListener('DOMContentLoaded', () => {
         orbit: earthOrbit,
         speed: 0.005,
         rotationSpeed: 0.02,
-        moonOrbitPivot: moonOrbitPivot, // Add this
-        moonOrbitSpeed: 0.05 // Speed of Moon's orbit around Earth
+        moonOrbitPivot: moonOrbitPivot, 
+        moonOrbitSpeed: 0.05,
+        clouds: earthClouds, // Store cloud mesh
+        cloudSpeed: 0.0015   // Rotation speed for clouds
     });
 
     // Mars
@@ -279,6 +356,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (p.moonOrbitPivot) {
                 p.moonOrbitPivot.rotation.y += p.moonOrbitSpeed; // Moon's orbit around the planet
+            }
+            if (p.clouds && p.cloudSpeed) {
+                p.clouds.rotation.y += p.cloudSpeed; // Cloud layer rotation
             }
         });
 

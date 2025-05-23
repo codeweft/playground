@@ -12,8 +12,12 @@ This project displays an animated 3D model of our solar system in the browser us
     *   Pan the view.
 *   **Basic Lighting:** A point light source emanates from the Sun, illuminating the planets, complemented by ambient light.
 *   **Starfield Background:** A dynamic starfield provides a backdrop for the solar system (using a texture or procedural generation).
-*   **Textured Celestial Bodies:** The Sun, planets, and Earth's Moon are rendered with textures for a more realistic appearance.
-*   **Earth's Moon:** Earth is accompanied by its Moon, which orbits it.
+*   **Textured Celestial Bodies:** The Sun and planets are rendered with textures for a more realistic appearance.
+    *   **Enhanced Earth Details:**
+        *   **Dynamic Clouds:** A transparent cloud layer, with its own rotation, adds atmospheric depth.
+        *   **City Lights:** An emissive map vividly displays city lights on Earth's night side.
+        *   **Surface Realism:** Specular (roughness) and normal/bump maps provide a more detailed surface appearance with varied reflectivity and the illusion of terrain.
+    *   **Enhanced Moon Details:** Earth's Moon orbits with an added bump map, enhancing crater and surface definition.
 
 ## How to View
 
