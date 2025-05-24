@@ -4,25 +4,28 @@ This project displays an animated 3D model of our solar system in the browser us
 
 ## Features
 
-*   **Animated Planets:** All eight planets (Mercury, Venus, Earth, Mars, Jupiter, Saturn with rings, Uranus, and Neptune) orbit the Sun.
-*   **Axial Rotation:** Planets (and the Sun) rotate on their own axes.
-*   **Interactive Camera:** Uses Three.js `OrbitControls` to allow users to:
-    *   Orbit the camera around the solar system.
-    *   Zoom in and out.
-    *   Pan the view.
-*   **Pause/Resume Orbit:** Ability to pause and resume the orbital movement of planets and moons via an on-screen button.
-*   **Basic Lighting:** A point light source emanates from the Sun, illuminating the planets, complemented by ambient light.
-*   **Starfield Background:** A dynamic starfield provides a backdrop for the solar system (using a texture or procedural generation).
+*   **Animated Celestial Bodies:** Planets, moons, and the Sun exhibit orbital and axial rotations.
+    *   **Planet Orbits:** Planets orbit the Sun.
+    *   **Planet Axial Rotation:** Planets (and the Sun) spin on their axes. Earth's cloud layer also rotates.
+    *   **Moon Orbits:** Moons orbit their parent planets.
+    *   **Moon Axial Rotation:** Moons spin on their own axes.
+*   **Interactive Navigation:**
+    *   **Fly Controls:** Free-flight camera navigation using Three.js `FlyControls`, allowing movement in all directions with keyboard (W,A,S,D for forward/backward/strafe, R,F for up/down, Q,E for roll) and mouse (drag to change view direction).
+*   **Granular Pause Controls:** Separate on-screen buttons allow toggling of:
+    *   Planet orbital movement around the Sun.
+    *   Planet axial rotation (including Sun and Earth's clouds).
+    *   Moon orbital movement around their parent planet.
+    *   Moon axial rotation.
 *   **Detailed Moons:** Many planets now feature their major moons:
-    *   **Earth:** Accompanied by its Moon, featuring a detailed bump map and orbiting Earth.
-    *   **Mars:** Features its two moons, Phobos and Deimos, with textures and orbits.
-    *   **Jupiter:** Includes its four Galilean moons (Io, Europa, Ganymede, Callisto), each with unique textures and orbital patterns.
-    *   **Saturn:** A selection of its major moons (Titan, Rhea, Enceladus) are represented with textures and orbits.
-*   **Textured Celestial Bodies:** The Sun and planets are rendered with textures for a more realistic appearance.
-*   **Enhanced Earth Details:**
-    *   **Dynamic Clouds:** A transparent cloud layer, with its own rotation, adds atmospheric depth.
-    *   **City Lights:** An emissive map vividly displays city lights on Earth's night side.
-    *   **Surface Realism:** Specular (roughness) and normal/bump maps provide a more detailed surface appearance with varied reflectivity and the illusion of terrain.
+    *   **Earth:** Accompanied by its Moon, featuring a detailed bump map.
+    *   **Mars:** Features its two moons, Phobos and Deimos.
+    *   **Jupiter:** Includes its four Galilean moons (Io, Europa, Ganymede, Callisto).
+    *   **Saturn:** A selection of its major moons (Titan, Rhea, Enceladus) are represented.
+*   **Visual Realism:**
+    *   **Starfield Background:** A star texture provides a backdrop.
+    *   **Textured Celestial Bodies:** Sun, planets, and major moons are rendered with textures.
+    *   **Enhanced Earth Details:** Includes dynamic clouds, city lights on the night side, and surface realism maps (specular/roughness, normal/bump).
+    *   **Lighting:** Point light from the Sun, complemented by ambient light.
 
 ## How to View
 

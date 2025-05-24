@@ -12,7 +12,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fallback to a simple procedural method if no texture can be loaded or found.
     const starTextureUrl = 'https://www.solarsystemscope.com/textures/download/2k_stars_milky_way.jpg'; // Worker can replace this
 
-    let isOrbitPaused = false; // Variable to control orbital pause state
+    // let isOrbitPaused = false; // Old general pause variable - commented out
+
+    // Granular Pause State Variables
+    let isPlanetOrbitPaused = false;    // For planet-Sun orbits
+    let isPlanetRotationPaused = false; // For planet axial rotation
+    let isMoonOrbitPaused = false;      // For moon-planet orbits
+    let isMoonRotationPaused = false;   // For moon axial rotation
 
     textureLoader.load(starTextureUrl, function(texture) {
         const starfieldGeometry = new THREE.SphereGeometry(500, 64, 64); // Large sphere
@@ -75,15 +81,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const ambientLight = new THREE.AmbientLight(0x404040, 0.7); // Soft white light, slightly brighter
     scene.add(ambientLight);
 
-    // Orbit Controls
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; 
-    controls.dampingFactor = 0.05;
+    // Orbit Controls (Commented out)
+    // const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // controls.enableDamping = true; 
+    // controls.dampingFactor = 0.05;
     // controls.minDistance = 10; 
     // controls.maxDistance = 200;
 
+    const clock = new THREE.Clock(); // For time-based animation (FlyControls needs delta)
+
+    // FlyControls
+    let flyControls = new THREE.FlyControls(camera, renderer.domElement);
+    flyControls.movementSpeed = 50; 
+    flyControls.rollSpeed = Math.PI / 12; 
+    flyControls.autoForward = false;
+    flyControls.dragToLook = true; 
+
     const planets = []; // Array to hold planet data for animation
-    const clock = new THREE.Clock(); // For time-based animation (optional, but good practice)
+    // const clock = new THREE.Clock(); // Clock is already defined above for FlyControls
 
     // Mercury
     const mercuryOrbit = new THREE.Object3D();
@@ -485,30 +500,78 @@ document.addEventListener('DOMContentLoaded', () => {
     function animate() {
         requestAnimationFrame(animate);
 
-        // Sun rotation
-        sun.rotation.y += 0.0005; // Slower sun rotation
+        const delta = clock.getDelta(); // Get time difference for frame-rate independent movement
+
+        // Sun axial rotation
+        if (sun && !isPlanetRotationPaused) {
+            sun.rotation.y += 0.0005; 
+        }
 
         // Planets animation
         planets.forEach(p => {
-            // Axial rotation (continues regardless of pause)
-            p.mesh.rotation.y += p.rotationSpeed;
-
-            // Cloud rotation (continues regardless of pause, if applicable)
-            if (p.clouds && p.cloudSpeed) {
-                p.clouds.rotation.y += p.cloudSpeed;
+            // Planet axial rotation & cloud rotation
+            if (!isPlanetRotationPaused) {
+                p.mesh.rotation.y += p.rotationSpeed;
+                if (p.clouds && p.cloudSpeed) { // Earth's clouds
+                    p.clouds.rotation.y += p.cloudSpeed;
+                }
             }
 
-            // Orbital movements (pauseable)
-            if (!isOrbitPaused) {
-                p.orbit.rotation.y += p.speed; // Planet's orbit around Sun
+            // Planet orbit around Sun
+            if (!isPlanetOrbitPaused) {
+                p.orbit.rotation.y += p.speed;
+            }
 
-                if (p.moonOrbitPivot && p.moonOrbitSpeed) { // Check moonOrbitSpeed as well
-                    p.moonOrbitPivot.rotation.y += p.moonOrbitSpeed; // Moon's orbit around the planet
+            // Earth's Moon orbit.
+            // Note: Earth's moon's axial rotation is not independently controlled in the current data structure.
+            // Its apparent rotation is tied to its orbit pivot.
+            if (p.moonOrbitPivot && p.moonOrbitSpeed) { 
+                if (!isMoonOrbitPaused) {
+                    p.moonOrbitPivot.rotation.y += p.moonOrbitSpeed;
                 }
+            }
+
+            // Mars's moons animation
+            if (p.marsMoons) {
+                p.marsMoons.forEach(moonObj => {
+                    if (!isMoonOrbitPaused) {
+                        moonObj.orbitPivot.rotation.y += moonObj.speed;
+                    }
+                    if (!isMoonRotationPaused) {
+                        moonObj.mesh.rotation.y += moonObj.rotationSpeed;
+                    }
+                });
+            }
+
+            // Jupiter's moons animation
+            if (p.jovianMoons) {
+                p.jovianMoons.forEach(moonObj => {
+                    if (!isMoonOrbitPaused) {
+                        moonObj.orbitPivot.rotation.y += moonObj.speed;
+                    }
+                    if (!isMoonRotationPaused) {
+                        moonObj.mesh.rotation.y += moonObj.rotationSpeed;
+                    }
+                });
+            }
+
+            // Saturn's moons animation
+            if (p.saturnianMoons) {
+                p.saturnianMoons.forEach(moonObj => {
+                    if (!isMoonOrbitPaused) {
+                        moonObj.orbitPivot.rotation.y += moonObj.speed;
+                    }
+                    if (!isMoonRotationPaused) {
+                        moonObj.mesh.rotation.y += moonObj.rotationSpeed;
+                    }
+                });
             }
         });
 
-        controls.update(); // Update controls in the animation loop
+        // controls.update(); // Commented out OrbitControls update
+        if (flyControls) {
+           flyControls.update(delta); // Update FlyControls
+        }
 
         renderer.render(scene, camera);
     }
@@ -525,20 +588,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log('Three.js setup complete with orbital and axial rotation.');
 
-    // Event listener for the pause button
+    // Event listener for the old pause button (now commented out)
+    /*
     const pauseButton = document.getElementById('pauseOrbitButton');
     if (pauseButton) {
         pauseButton.addEventListener('click', () => {
-            isOrbitPaused = !isOrbitPaused; // Toggle the pause state
-
-            if (isOrbitPaused) {
-                pauseButton.textContent = 'Resume Orbit';
-            } else {
-                pauseButton.textContent = 'Pause Orbit';
-            }
-            console.log('Orbit pause state:', isOrbitPaused); // For debugging
+            // isOrbitPaused = !isOrbitPaused; // Old variable
+            // if (isOrbitPaused) {
+            //     pauseButton.textContent = 'Resume Orbit';
+            // } else {
+            //     pauseButton.textContent = 'Pause Orbit';
+            // }
+            // console.log('Orbit pause state:', isOrbitPaused); 
         });
     } else {
-        console.error('Pause button not found in the DOM.');
+        // console.error('Old pause button not found in the DOM.');
     }
+    */
+
+    // New Granular Pause Button Listeners
+    const planetOrbitButton = document.getElementById('pausePlanetOrbitButton');
+    if (planetOrbitButton) {
+        planetOrbitButton.addEventListener('click', () => {
+            isPlanetOrbitPaused = !isPlanetOrbitPaused;
+            planetOrbitButton.textContent = isPlanetOrbitPaused ? 'Resume Planet Orbit' : 'Pause Planet Orbit';
+            console.log('Planet Orbit Pause state:', isPlanetOrbitPaused);
+        });
+    } else { console.error('pausePlanetOrbitButton not found'); }
+
+    const planetRotationButton = document.getElementById('pausePlanetRotationButton');
+    if (planetRotationButton) {
+        planetRotationButton.addEventListener('click', () => {
+            isPlanetRotationPaused = !isPlanetRotationPaused;
+            planetRotationButton.textContent = isPlanetRotationPaused ? 'Resume Planet Spin' : 'Pause Planet Spin';
+            console.log('Planet Rotation Pause state:', isPlanetRotationPaused);
+        });
+    } else { console.error('pausePlanetRotationButton not found'); }
+
+    const moonOrbitButton = document.getElementById('pauseMoonOrbitButton');
+    if (moonOrbitButton) {
+        moonOrbitButton.addEventListener('click', () => {
+            isMoonOrbitPaused = !isMoonOrbitPaused;
+            moonOrbitButton.textContent = isMoonOrbitPaused ? 'Resume Moon Orbit' : 'Pause Moon Orbit';
+            console.log('Moon Orbit Pause state:', isMoonOrbitPaused);
+        });
+    } else { console.error('pauseMoonOrbitButton not found'); }
+
+    const moonRotationButton = document.getElementById('pauseMoonRotationButton');
+    if (moonRotationButton) {
+        moonRotationButton.addEventListener('click', () => {
+            isMoonRotationPaused = !isMoonRotationPaused;
+            moonRotationButton.textContent = isMoonRotationPaused ? 'Resume Moon Spin' : 'Pause Moon Spin';
+            console.log('Moon Rotation Pause state:', isMoonRotationPaused);
+        });
+    } else { console.error('pauseMoonRotationButton not found'); }
+
 });
