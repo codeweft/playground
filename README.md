@@ -10,7 +10,9 @@ This project displays an animated 3D model of our solar system in the browser us
     *   **Moon Orbits:** Moons orbit their parent planets.
     *   **Moon Axial Rotation:** Moons spin on their own axes.
 *   **Interactive Navigation:**
-    *   **Fly Controls:** Free-flight camera navigation using Three.js `FlyControls`, allowing movement in all directions with keyboard (W,A,S,D for forward/backward/strafe, R,F for up/down, Q,E for roll) and mouse (drag to change view direction).
+    *   **Fly Controls:** Free-flight camera navigation using Three.js `FlyControls`, allowing movement in all directions with keyboard (W,A,S,D, R,F for up/down, Q,E for roll) and mouse (drag to change view direction).
+    *   **Quick Travel UI:** A dropdown menu allows instant travel to a viewpoint near the Sun or any major planet.
+    *   **On-Screen Help:** A panel displays FlyControls commands, and can be closed by the user.
 *   **Granular Pause Controls:** Separate on-screen buttons allow toggling of:
     *   Planet orbital movement around the Sun.
     *   Planet axial rotation (including Sun and Earth's clouds).

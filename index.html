@@ -64,6 +64,29 @@
         <button id="pausePlanetRotationButton" class="control-button">Pause Planet Spin</button>
         <button id="pauseMoonOrbitButton" class="control-button">Pause Moon Orbit</button>
         <button id="pauseMoonRotationButton" class="control-button">Pause Moon Spin</button>
+        <hr style="border-color:rgba(255,255,255,0.2); margin-top: 7px; margin-bottom: 2px;">
+        <label for="goToPlanetSelect" style="color:white; font-size:12px; margin-left:5px; margin-right:3px;">Go To:</label>
+        <select id="goToPlanetSelect" class="control-button" style="width: calc(100% - 10px); margin-top:0px">
+            <option value="">Select Target...</option>
+            <option value="Sun">Sun</option>
+            <option value="Mercury">Mercury</option>
+            <option value="Venus">Venus</option>
+            <option value="Earth">Earth</option>
+            <option value="Mars">Mars</option>
+            <option value="Jupiter">Jupiter</option>
+            <option value="Saturn">Saturn</option>
+            <option value="Uranus">Uranus</option>
+            <option value="Neptune">Neptune</option>
+        </select>
+    </div>
+
+    <div id="flyControlsHelp" class="help-panel">
+        <h4>FlyControls Help <button id="closeFlyHelp" class="close-button">&times;</button></h4>
+        <p><b>W, S:</b> Move Forward/Backward</p>
+        <p><b>A, D:</b> Strafe Left/Right</p>
+        <p><b>R, F:</b> Move Up/Down</p>
+        <p><b>Q, E:</b> Roll Left/Right</p>
+        <p><b>Mouse Drag:</b> Look/Steer</p>
     </div>
 
     <canvas id="solarSystemCanvas"></canvas>

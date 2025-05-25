@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error loading Sun texture:', err);
     });
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    sun.name = "Sun"; // Assign name for Go To feature
     scene.add(sun);
 
     // Point Light for the Sun
@@ -113,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error loading Mercury texture:', err);
     });
     const mercury = new THREE.Mesh(mercuryGeometry, mercuryMaterial);
+    mercury.name = "Mercury"; // Assign name
     mercury.position.x = 10;
     mercuryOrbit.add(mercury);
     planets.push({ mesh: mercury, orbit: mercuryOrbit, speed: 0.01, rotationSpeed: 0.05 });
@@ -130,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error loading Venus texture:', err);
     });
     const venus = new THREE.Mesh(venusGeometry, venusMaterial);
+    venus.name = "Venus"; // Assign name
     venus.position.x = 15;
     venusOrbit.add(venus);
     planets.push({ mesh: venus, orbit: venusOrbit, speed: 0.007, rotationSpeed: 0.03 });
@@ -194,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    earth.name = "Earth"; // Assign name
     earth.position.x = 20;
     earthOrbit.add(earth);
 
@@ -475,6 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error loading Uranus texture:', err);
     });
     const uranus = new THREE.Mesh(uranusGeometry, uranusMaterial);
+    uranus.name = "Uranus"; // Assign name
     uranus.position.x = 55;
     uranusOrbit.add(uranus);
     planets.push({ mesh: uranus, orbit: uranusOrbit, speed: 0.0007, rotationSpeed: 0.015 });
@@ -492,6 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error loading Neptune texture:', err);
     });
     const neptune = new THREE.Mesh(neptuneGeometry, neptuneMaterial);
+    neptune.name = "Neptune"; // Assign name
     neptune.position.x = 65;
     neptuneOrbit.add(neptune);
     planets.push({ mesh: neptune, orbit: neptuneOrbit, speed: 0.0005, rotationSpeed: 0.012 });
@@ -643,4 +649,76 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     } else { console.error('pauseMoonRotationButton not found'); }
 
+    // "Go to Planet" Dropdown Logic
+    const goToPlanetSelect = document.getElementById('goToPlanetSelect');
+    const celestialBodiesMap = { Sun: sun }; // Initialize with Sun
+    
+    planets.forEach(p => {
+        if (p.mesh && p.mesh.name) { 
+            celestialBodiesMap[p.mesh.name] = p.mesh;
+        } else {
+            console.warn("A planet in the 'planets' array is missing a mesh or a name property on its mesh, or is Earth (handled separately for moon). Planet object:", p);
+            // Special handling for Earth if its moons are not direct children of p.mesh
+            if (p.mesh.name === "Earth" && p.moonOrbitPivot && p.moonOrbitPivot.children.length > 0) {
+                 // If we wanted to target Earth's moon directly, it would be:
+                 // celestialBodiesMap["Moon"] = p.moonOrbitPivot.children[0]; // Assuming moon is the first child
+            }
+        }
+    });
+     // console.log("Celestial Bodies Map for Go To:", celestialBodiesMap); // For debugging
+
+    if (goToPlanetSelect && Object.keys(celestialBodiesMap).length > 1) { 
+        goToPlanetSelect.addEventListener('change', function() {
+            const selectedBodyName = this.value;
+            const selectedBody = celestialBodiesMap[selectedBodyName];
+
+            if (selectedBody) {
+                const bodyPosition = new THREE.Vector3();
+                selectedBody.getWorldPosition(bodyPosition); 
+
+                let offsetDistance = 20; // Default increased offset
+                if (selectedBody.geometry && selectedBody.geometry.parameters.radius) {
+                    offsetDistance = selectedBody.geometry.parameters.radius * 5;
+                    if (selectedBodyName === "Sun") offsetDistance = selectedBody.geometry.parameters.radius * 3;
+                    offsetDistance = Math.max(offsetDistance, 20); 
+                } else if (selectedBodyName === "Sun" && sun.geometry.parameters.radius) { 
+                    offsetDistance = sun.geometry.parameters.radius * 3;
+                     offsetDistance = Math.max(offsetDistance, 20);
+                }
+                
+                // Simple offset strategy: position camera somewhat behind and above the target
+                const cameraTargetPosition = new THREE.Vector3(
+                    bodyPosition.x + offsetDistance,
+                    bodyPosition.y + offsetDistance * 0.4, // Less elevation
+                    bodyPosition.z + offsetDistance
+                );
+
+                camera.position.copy(cameraTargetPosition);
+                camera.lookAt(bodyPosition); 
+                camera.updateMatrixWorld(); // Important for controls to catch up
+                
+                // FlyControls should adapt. If not, direct manipulation of flyControls.object might be needed.
+                // flyControls.object.position.copy(cameraTargetPosition);
+                // flyControls.object.lookAt(bodyPosition);
+                
+                this.value = ""; // Reset dropdown
+            }
+        });
+    } else {
+        if (!goToPlanetSelect) console.error('"Go to Planet" select element not found.');
+        else console.error('Celestial bodies map not populated sufficiently for "Go To" feature. Map size:', Object.keys(celestialBodiesMap).length);
+    }
+
+    // FlyControls Help Panel Close Button Logic
+    const flyHelpPanel = document.getElementById('flyControlsHelp');
+    const closeFlyHelpButton = document.getElementById('closeFlyHelp');
+
+    if (flyHelpPanel && closeFlyHelpButton) {
+        closeFlyHelpButton.addEventListener('click', () => {
+            flyHelpPanel.style.display = 'none';
+        });
+    } else {
+        if (!flyHelpPanel) console.error('FlyControls help panel not found.');
+        if (!closeFlyHelpButton) console.error('Close button for FlyControls help not found.');
+    }
 });
