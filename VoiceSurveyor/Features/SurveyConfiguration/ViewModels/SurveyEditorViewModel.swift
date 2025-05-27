@@ -81,11 +81,11 @@ class SurveyEditorViewModel: ObservableObject {
                 currentSurvey = existingSurvey
                 // Update existing survey title if changed
                 if currentSurvey.title != surveyTitle {
-                    try persistenceService.updateSurvey(survey: currentSurvey, title: surveyTitle)
+                    try await persistenceService.updateSurvey(survey: currentSurvey, title: surveyTitle)
                 }
             } else {
                 // Create new survey
-                currentSurvey = try persistenceService.createSurvey(title: surveyTitle)
+                currentSurvey = try await persistenceService.createSurvey(title: surveyTitle)
                 self.survey = currentSurvey // Keep reference to the now existing survey
                 self.isNewSurvey = false // It's no longer a new survey
             }
@@ -99,7 +99,7 @@ class SurveyEditorViewModel: ObservableObject {
                 if let coreDataId = questionItem.coreDataId,
                    let existingQuestion = existingQuestionCoreDataObjects.first(where: { $0.objectID == coreDataId }) {
                     // Update existing question
-                    try persistenceService.updateQuestionInSurvey(
+                    try await persistenceService.updateQuestionInSurvey(
                         question: existingQuestion,
                         text: questionItem.text,
                         type: questionItem.type,
@@ -110,7 +110,7 @@ class SurveyEditorViewModel: ObservableObject {
                     existingQuestionCoreDataObjects.removeAll(where: {$0.objectID == coreDataId })
                 } else {
                     // Add new question
-                    _ = try persistenceService.addQuestionToSurvey(
+                    _ = try await persistenceService.addQuestionToSurvey(
                         survey: currentSurvey,
                         text: questionItem.text,
                         type: questionItem.type,
@@ -127,46 +127,17 @@ class SurveyEditorViewModel: ObservableObject {
             // without explicitly calling `deleteQuestion`. This is handled by `originalQuestionIdsToDelete`.
 
             for questionObjectIDToDelete in originalQuestionIdsToDelete {
-                 if let questionToDelete = try? persistenceService.context.existingObject(with: questionObjectIDToDelete) as? Question {
-                    try persistenceService.deleteQuestionFromSurvey(survey: currentSurvey, question: questionToDelete)
+                 if let questionToDelete = try await persistenceService.fetchQuestion(with: questionObjectIDToDelete) {
+                    try await persistenceService.deleteQuestionFromSurvey(survey: currentSurvey, question: questionToDelete)
                  }
             }
             originalQuestionIdsToDelete.removeAll() // Clear after processing
 
-            try persistenceService.saveContext() // Commit all changes
+            try await persistenceService.saveContext() // Commit all changes
 
         } catch {
             print("Error saving survey: \(error)")
             // Handle error appropriately (e.g., show alert to user)
         }
-    }
-}
-
-// Extension to allow PersistenceService to access the context if needed for fetching objects by ID
-extension PersistenceServiceProtocol {
-    var context: NSManagedObjectContext {
-        if let service = self as? PersistenceService {
-            return service.context // Assuming PersistenceService has a public context
-        }
-        // Fallback or error if the context cannot be accessed.
-        // This might indicate a need to refactor how context is accessed or passed.
-        // For this example, we'll assume direct access or a specific method is available.
-        // A better approach might be to add a method to the protocol like `fetchQuestion(by objectID: NSManagedObjectID)`.
-        fatalError("Context could not be accessed from PersistenceServiceProtocol directly. Implement access or specific fetch methods.")
-    }
-}
-
-// Temporary extension on PersistenceService to expose context (if not already public)
-// This is illustrative. In a real app, ensure context access is designed carefully.
-fileprivate extension PersistenceService {
-    var context: NSManagedObjectContext {
-        // Assuming `PersistenceService` has a property `context: NSManagedObjectContext`
-        // This is a simplified example. If context is private, you'd need a method in PersistenceService
-        // to fetch an object by its ID, or make context accessible in a controlled way.
-        // For the purpose of this example, we'll assume it's accessible for `existingObject(with:)`.
-        
-        // If your PersistenceService is initialized with `PersistenceController.shared.container.viewContext`,
-        // you can use that.
-        return PersistenceController.shared.container.viewContext
     }
 }

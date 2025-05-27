@@ -150,6 +150,18 @@ class PersistenceService: PersistenceServiceProtocol {
         }
     }
 
+    func fetchQuestion(with objectID: NSManagedObjectID) async throws -> Question? {
+        return try await context.perform {
+            // Attempt to fetch the object. It might throw if the objectID is temporary,
+            // or if the object doesn't exist (though existingObject(with:) usually faults it in).
+            // Consider if a simple fetch or existingObject is better. existingObject is fine if ID is permanent.
+            guard let object = try? self.context.existingObject(with: objectID) else {
+                return nil // Object not found or ID invalid in this context
+            }
+            return object as? Question
+        }
+    }
+
     // MARK: - Participant CRUD
     func createParticipant(name: String, details: String?) async throws -> Participant {
         return try await context.perform {

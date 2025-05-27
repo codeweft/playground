@@ -63,8 +63,7 @@ struct PersistenceController {
             try viewContext.save()
         } catch {
             let nsError = error as NSError
-            // logger.error("Failed to save preview context: \(nsError.localizedDescription), userInfo: \(nsError.userInfo)")
-            print("[PersistenceControllerError] Failed to save preview context: \(nsError.localizedDescription), userInfo: \(nsError.userInfo)") // Placeholder if OSLog not used by worker
+            AppLogger.error("Failed to save preview context: \(nsError.localizedDescription), userInfo: \(nsError.userInfo)")
             // Depending on how critical previews are, one might still choose to fatalError for dev experience.
             // For this task, we're removing fatalError.
         }
@@ -80,8 +79,7 @@ struct PersistenceController {
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                // logger.critical("Failed to load persistent store: \(error.localizedDescription), userInfo: \(error.userInfo)")
-                print("[PersistenceControllerError] CRITICAL: Failed to load persistent store: \(error.localizedDescription), userInfo: \(error.userInfo)") // Placeholder
+                AppLogger.critical("Failed to load persistent store: \(error.localizedDescription), userInfo: \(error.userInfo)")
                 // In a real app, you might set a global error state here to inform the UI.
                 // For example: AppErrorManager.shared.reportFatalError(error)
             }
@@ -96,8 +94,7 @@ struct PersistenceController {
                 do {
                     try context.save()
                 } catch {
-                    // logger.error("Failed to save context: \(error.localizedDescription), userInfo: \((error as NSError).userInfo)")
-                    print("[PersistenceControllerError] Failed to save context: \(error.localizedDescription), userInfo: \((error as NSError).userInfo)") // Placeholder
+                    AppLogger.error("Failed to save context: \(error.localizedDescription), userInfo: \((error as NSError).userInfo)")
                     throw error // Rethrow the error for the caller to handle
                 }
             }

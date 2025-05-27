@@ -17,6 +17,7 @@ protocol PersistenceServiceProtocol {
     func addQuestionToSurvey(survey: Survey, text: String, type: QuestionType, options: [String]?, order: Int) async throws -> Question
     func updateQuestionInSurvey(question: Question, text: String?, type: QuestionType?, options: [String]?, order: Int?) async throws
     func deleteQuestionFromSurvey(survey: Survey, question: Question) async throws
+    func fetchQuestion(with objectID: NSManagedObjectID) async throws -> Question?
 
     // MARK: - Participant CRUD
     func createParticipant(name: String, details: String?) async throws -> Participant
