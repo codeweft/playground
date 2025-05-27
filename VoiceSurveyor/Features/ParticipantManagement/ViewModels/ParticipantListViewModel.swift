@@ -22,7 +22,7 @@ class ParticipantListViewModel: ObservableObject {
             let defaultSort = NSSortDescriptor(keyPath: \Participant.name, ascending: true)
             participants = try persistenceService.fetchParticipants(searchTerm: searchTerm, sortDescriptor: sortDescriptor ?? defaultSort)
         } catch {
-            print("Error fetching participants: \(error)")
+            AppLogger.error("Error fetching participants: \(error.localizedDescription)")
             // Handle error appropriately, e.g., show an alert to the user
             participants = [] // Ensure consistent state on error
         }
@@ -34,7 +34,7 @@ class ParticipantListViewModel: ObservableObject {
             do {
                 try persistenceService.deleteParticipant(participant: participant)
             } catch {
-                print("Error deleting participant \(participant.name ?? "Unknown"): \(error)")
+                AppLogger.error("Error deleting participant \(participant.name ?? "Unknown"): \(error.localizedDescription)")
                 // Handle error, perhaps by not removing it from the list or showing an alert
             }
         }
@@ -48,7 +48,7 @@ class ParticipantListViewModel: ObservableObject {
             try persistenceService.deleteParticipant(participant: participant)
             fetchParticipants() // Refresh list
         } catch {
-            print("Error deleting participant \(participant.name ?? "Unknown"): \(error)")
+            AppLogger.error("Error deleting participant \(participant.name ?? "Unknown"): \(error.localizedDescription)")
             // Handle error
         }
     }

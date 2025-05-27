@@ -34,7 +34,7 @@ struct QuestionItem: Identifiable, Hashable {
             } catch {
                 self.options = []
                 // Consider logging this error or handling it more gracefully
-                print("Error decoding options for question ID \(self.id): \(error)")
+                AppLogger.error("Error decoding options for question ID \(self.id): \(error.localizedDescription)")
             }
         } else {
             self.options = []
@@ -51,7 +51,7 @@ struct QuestionItem: Identifiable, Hashable {
             return String(data: data, encoding: .utf8)
         } catch {
             // Consider logging this error
-            print("Error encoding options for question ID \(self.id): \(error)")
+            AppLogger.error("Error encoding options for question ID \(self.id): \(error.localizedDescription)")
             return nil
         }
     }

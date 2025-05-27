@@ -109,7 +109,7 @@ class SurveyResultsViewModel: ObservableObject {
 
         } catch {
             errorMessage = "Failed to fetch survey results: \(error.localizedDescription)"
-            print(errorMessage ?? "Unknown error in fetchResults")
+            AppLogger.error("Failed to fetch survey results: \(error.localizedDescription)")
         }
         isLoading = false
     }

@@ -28,7 +28,7 @@ class ParticipantEditorViewModel: ObservableObject {
 
     func saveParticipant() -> Bool {
         guard !participantName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            print("Participant name cannot be empty.")
+            AppLogger.warning("Participant name cannot be empty.")
             // Optionally, set an error message property to display in the UI
             return false
         }
@@ -68,7 +68,7 @@ class ParticipantEditorViewModel: ObservableObject {
 
             return true
         } catch {
-            print("Error saving participant: \(error)")
+            AppLogger.error("Error saving participant: \(error.localizedDescription)")
             // Handle error appropriately (e.g., show alert to user, set error message property)
             return false
         }
