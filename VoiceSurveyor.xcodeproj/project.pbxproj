@@ -27,24 +27,88 @@
 		BA5E4F732DE61AA200237029 /* VoiceSurveyor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceSurveyor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA5E4F882DE61AA400237029 /* VoiceSurveyorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoiceSurveyorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA5E4F922DE61AA400237029 /* VoiceSurveyorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoiceSurveyorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF0000000000000000000000 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/ContentView.swift; sourceTree = "<group>"; };
+		CF0000000000000000000001 /* IndividualResponse+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/IndividualResponse+CoreDataClass.swift"; sourceTree = "<group>"; };
+		CF0000000000000000000002 /* IndividualResponse+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/IndividualResponse+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		CF0000000000000000000003 /* Participant+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/Participant+CoreDataClass.swift"; sourceTree = "<group>"; };
+		CF0000000000000000000004 /* Participant+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/Participant+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		CF0000000000000000000005 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/PersistenceController.swift; sourceTree = "<group>"; };
+		CF0000000000000000000006 /* Question+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/Question+CoreDataClass.swift"; sourceTree = "<group>"; };
+		CF0000000000000000000007 /* Question+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/Question+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		CF0000000000000000000008 /* Survey+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/Survey+CoreDataClass.swift"; sourceTree = "<group>"; };
+		CF0000000000000000000009 /* Survey+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/Survey+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		CF000000000000000000000A /* SurveyResponse+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/SurveyResponse+CoreDataClass.swift"; sourceTree = "<group>"; };
+		CF000000000000000000000B /* SurveyResponse+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VoiceSurveyor/SurveyResponse+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		CF000000000000000000000D /* InterviewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/Interview/ViewModels/InterviewViewModel.swift; sourceTree = "<group>"; };
+		CF000000000000000000000E /* InterviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/Interview/Views/InterviewView.swift; sourceTree = "<group>"; };
+		CF000000000000000000000F /* ParticipantEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/ParticipantManagement/ViewModels/ParticipantEditorViewModel.swift; sourceTree = "<group>"; };
+		CF0000000000000000000010 /* ParticipantListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/ParticipantManagement/ViewModels/ParticipantListViewModel.swift; sourceTree = "<group>"; };
+		CF0000000000000000000011 /* ParticipantEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/ParticipantManagement/Views/ParticipantEditorView.swift; sourceTree = "<group>"; };
+		CF0000000000000000000012 /* ParticipantListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/ParticipantManagement/Views/ParticipantListView.swift; sourceTree = "<group>"; };
+		CF0000000000000000000013 /* SurveyResultsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/Results/ViewModels/SurveyResultsViewModel.swift; sourceTree = "<group>"; };
+		CF0000000000000000000014 /* ResponseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/Results/Views/ResponseDetailView.swift; sourceTree = "<group>"; };
+		CF0000000000000000000015 /* SurveyResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/Results/Views/SurveyResultsView.swift; sourceTree = "<group>"; };
+		CF0000000000000000000016 /* SurveyEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/SurveyConfiguration/ViewModels/SurveyEditorViewModel.swift; sourceTree = "<group>"; };
+		CF0000000000000000000017 /* SurveyListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/SurveyConfiguration/ViewModels/SurveyListViewModel.swift; sourceTree = "<group>"; };
+		CF0000000000000000000018 /* QuestionEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/SurveyConfiguration/Views/QuestionEditorView.swift; sourceTree = "<group>"; };
+		CF0000000000000000000019 /* SurveyEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/SurveyConfiguration/Views/SurveyEditorView.swift; sourceTree = "<group>"; };
+		CF000000000000000000001A /* SurveyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Features/SurveyConfiguration/Views/SurveyListView.swift; sourceTree = "<group>"; };
+		CF000000000000000000001B /* MainAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/MainAppView.swift; sourceTree = "<group>"; };
+		CF000000000000000000001C /* QuestionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Models/QuestionItem.swift; sourceTree = "<group>"; };
+		CF000000000000000000001D /* PersistenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Services/PersistenceService.swift; sourceTree = "<group>"; };
+		CF000000000000000000001E /* PersistenceServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Services/PersistenceServiceProtocol.swift; sourceTree = "<group>"; };
+		CF000000000000000000001F /* SpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyor/VoiceSurveyor/Services/SpeechService.swift; sourceTree = "<group>"; };
+		CF0000000000000000000200 /* VoiceSurveyorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyorTests/VoiceSurveyorTests.swift; sourceTree = "<group>"; };
+		CF0000000000000000000400 /* VoiceSurveyorUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyorUITests/VoiceSurveyorUITests.swift; sourceTree = "<group>"; };
+		CF0000000000000000000401 /* VoiceSurveyorUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSurveyorUITests/VoiceSurveyorUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		CF1000000000000000000000 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = VoiceSurveyor/Assets.xcassets; sourceTree = "<group>"; };
+		CF1000000000000000000002 /* VoiceSurveyor.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = VoiceSurveyor/VoiceSurveyor.xcdatamodeld; sourceTree = "<group>"; };
+		CF1000000000000000000004 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "VoiceSurveyor/Preview Content/Preview Assets.xcassets"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		BAC43C0F2DE6232900F1E45A /* Exceptions for "VoiceSurveyor" folder in "VoiceSurveyor" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				VoiceSurveyorApp.swift,
-			);
-			target = BA5E4F722DE61AA200237029 /* VoiceSurveyor */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+/* Begin PBXBuildFile section */
+		CF0000000000000000000100 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000000 /* ContentView.swift */; };
+		CF0000000000000000000101 /* IndividualResponse+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000001 /* IndividualResponse+CoreDataClass.swift */; };
+		CF0000000000000000000102 /* IndividualResponse+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000002 /* IndividualResponse+CoreDataProperties.swift */; };
+		CF0000000000000000000103 /* Participant+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000003 /* Participant+CoreDataClass.swift */; };
+		CF0000000000000000000104 /* Participant+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000004 /* Participant+CoreDataProperties.swift */; };
+		CF0000000000000000000105 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000005 /* PersistenceController.swift */; };
+		CF0000000000000000000106 /* Question+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000006 /* Question+CoreDataClass.swift */; };
+		CF0000000000000000000107 /* Question+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000007 /* Question+CoreDataProperties.swift */; };
+		CF0000000000000000000108 /* Survey+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000008 /* Survey+CoreDataClass.swift */; };
+		CF0000000000000000000109 /* Survey+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000009 /* Survey+CoreDataProperties.swift */; };
+		CF000000000000000000010A /* SurveyResponse+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000000A /* SurveyResponse+CoreDataClass.swift */; };
+		CF000000000000000000010B /* SurveyResponse+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000000B /* SurveyResponse+CoreDataProperties.swift */; };
+		CF000000000000000000010D /* InterviewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000000D /* InterviewViewModel.swift */; };
+		CF000000000000000000010E /* InterviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000000E /* InterviewView.swift */; };
+		CF000000000000000000010F /* ParticipantEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000000F /* ParticipantEditorViewModel.swift */; };
+		CF0000000000000000000110 /* ParticipantListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000010 /* ParticipantListViewModel.swift */; };
+		CF0000000000000000000111 /* ParticipantEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000011 /* ParticipantEditorView.swift */; };
+		CF0000000000000000000112 /* ParticipantListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000012 /* ParticipantListView.swift */; };
+		CF0000000000000000000113 /* SurveyResultsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000013 /* SurveyResultsViewModel.swift */; };
+		CF0000000000000000000114 /* ResponseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000014 /* ResponseDetailView.swift */; };
+		CF0000000000000000000115 /* SurveyResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000015 /* SurveyResultsView.swift */; };
+		CF0000000000000000000116 /* SurveyEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000016 /* SurveyEditorViewModel.swift */; };
+		CF0000000000000000000117 /* SurveyListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000017 /* SurveyListViewModel.swift */; };
+		CF0000000000000000000118 /* QuestionEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000018 /* QuestionEditorView.swift */; };
+		CF0000000000000000000119 /* SurveyEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000019 /* SurveyEditorView.swift */; };
+		CF000000000000000000011A /* SurveyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000001A /* SurveyListView.swift */; };
+		CF000000000000000000011B /* MainAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000001B /* MainAppView.swift */; };
+		CF000000000000000000011C /* QuestionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000001C /* QuestionItem.swift */; };
+		CF000000000000000000011D /* PersistenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000001D /* PersistenceService.swift */; };
+		CF000000000000000000011E /* PersistenceServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000001E /* PersistenceServiceProtocol.swift */; };
+		CF000000000000000000011F /* SpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF000000000000000000001F /* SpeechService.swift */; };
+		CF0000000000000000000300 /* VoiceSurveyorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000200 /* VoiceSurveyorTests.swift */; };
+		CF0000000000000000000500 /* VoiceSurveyorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000400 /* VoiceSurveyorUITests.swift */; };
+		CF0000000000000000000501 /* VoiceSurveyorUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0000000000000000000401 /* VoiceSurveyorUITestsLaunchTests.swift */; };
+		CF1000000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CF1000000000000000000000 /* Assets.xcassets */; };
+		CF1000000000000000000003 /* VoiceSurveyor.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = CF1000000000000000000002 /* VoiceSurveyor.xcdatamodeld */; };
+		CF1000000000000000000005 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CF1000000000000000000004 /* Preview Assets.xcassets */; };
+/* End PBXBuildFile section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BA5E4F752DE61AA200237029 /* VoiceSurveyor */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				BAC43C0F2DE6232900F1E45A /* Exceptions for "VoiceSurveyor" folder in "VoiceSurveyor" target */,
-			);
 			path = VoiceSurveyor;
 			sourceTree = "<group>";
 		};
@@ -119,9 +183,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				BA5E4F752DE61AA200237029 /* VoiceSurveyor */,
 			);
 			name = VoiceSurveyor;
 			packageProductDependencies = (
@@ -225,6 +286,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF1000000000000000000001 /* Assets.xcassets in Resources */,
+				CF1000000000000000000003 /* VoiceSurveyor.xcdatamodeld in Resources */,
+				CF1000000000000000000005 /* Preview Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +313,37 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF0000000000000000000100 /* ContentView.swift in Sources */,
+				CF0000000000000000000101 /* IndividualResponse+CoreDataClass.swift in Sources */,
+				CF0000000000000000000102 /* IndividualResponse+CoreDataProperties.swift in Sources */,
+				CF0000000000000000000103 /* Participant+CoreDataClass.swift in Sources */,
+				CF0000000000000000000104 /* Participant+CoreDataProperties.swift in Sources */,
+				CF0000000000000000000105 /* PersistenceController.swift in Sources */,
+				CF0000000000000000000106 /* Question+CoreDataClass.swift in Sources */,
+				CF0000000000000000000107 /* Question+CoreDataProperties.swift in Sources */,
+				CF0000000000000000000108 /* Survey+CoreDataClass.swift in Sources */,
+				CF0000000000000000000109 /* Survey+CoreDataProperties.swift in Sources */,
+				CF000000000000000000010A /* SurveyResponse+CoreDataClass.swift in Sources */,
+				CF000000000000000000010B /* SurveyResponse+CoreDataProperties.swift in Sources */,
+				CF000000000000000000010D /* InterviewViewModel.swift in Sources */,
+				CF000000000000000000010E /* InterviewView.swift in Sources */,
+				CF000000000000000000010F /* ParticipantEditorViewModel.swift in Sources */,
+				CF0000000000000000000110 /* ParticipantListViewModel.swift in Sources */,
+				CF0000000000000000000111 /* ParticipantEditorView.swift in Sources */,
+				CF0000000000000000000112 /* ParticipantListView.swift in Sources */,
+				CF0000000000000000000113 /* SurveyResultsViewModel.swift in Sources */,
+				CF0000000000000000000114 /* ResponseDetailView.swift in Sources */,
+				CF0000000000000000000115 /* SurveyResultsView.swift in Sources */,
+				CF0000000000000000000116 /* SurveyEditorViewModel.swift in Sources */,
+				CF0000000000000000000117 /* SurveyListViewModel.swift in Sources */,
+				CF0000000000000000000118 /* QuestionEditorView.swift in Sources */,
+				CF0000000000000000000119 /* SurveyEditorView.swift in Sources */,
+				CF000000000000000000011A /* SurveyListView.swift in Sources */,
+				CF000000000000000000011B /* MainAppView.swift in Sources */,
+				CF000000000000000000011C /* QuestionItem.swift in Sources */,
+				CF000000000000000000011D /* PersistenceService.swift in Sources */,
+				CF000000000000000000011E /* PersistenceServiceProtocol.swift in Sources */,
+				CF000000000000000000011F /* SpeechService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,6 +351,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF0000000000000000000300 /* VoiceSurveyorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -263,6 +359,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF0000000000000000000500 /* VoiceSurveyorUITests.swift in Sources */,
+				CF0000000000000000000501 /* VoiceSurveyorUITestsLaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,7 +432,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -391,7 +489,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -467,7 +565,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = WM9Q96XF49;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.boardoutlook.VoiceSurveyorTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -486,7 +584,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = WM9Q96XF49;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.boardoutlook.VoiceSurveyorTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
