@@ -1,7 +1,7 @@
 import Foundation
 import CoreData
 
-extension Survey {
+public extension Survey {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Survey> {
         return NSFetchRequest<Survey>(entityName: "Survey")
@@ -64,9 +64,5 @@ extension Survey {
 
     @objc(removeSurveyResponses:)
     @NSManaged public func removeFromSurveyResponses(_ values: NSSet)
-
-}
-
-extension Survey : Identifiable {
 
 }
