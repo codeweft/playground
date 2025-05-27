@@ -1,7 +1,7 @@
 import Foundation
 import CoreData
 
-extension Participant {
+public extension Participant {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Participant> {
         return NSFetchRequest<Participant>(entityName: "Participant")
@@ -28,9 +28,5 @@ extension Participant {
 
     @objc(removeSurveyResponses:)
     @NSManaged public func removeFromSurveyResponses(_ values: NSSet)
-
-}
-
-extension Participant : Identifiable {
 
 }

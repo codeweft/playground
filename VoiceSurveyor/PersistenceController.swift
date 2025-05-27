@@ -63,7 +63,10 @@ struct PersistenceController {
             try viewContext.save()
         } catch {
             let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            // logger.error("Failed to save preview context: \(nsError.localizedDescription), userInfo: \(nsError.userInfo)")
+            print("[PersistenceControllerError] Failed to save preview context: \(nsError.localizedDescription), userInfo: \(nsError.userInfo)") // Placeholder if OSLog not used by worker
+            // Depending on how critical previews are, one might still choose to fatalError for dev experience.
+            // For this task, we're removing fatalError.
         }
         return result
     }()
@@ -77,20 +80,26 @@ struct PersistenceController {
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                // logger.critical("Failed to load persistent store: \(error.localizedDescription), userInfo: \(error.userInfo)")
+                print("[PersistenceControllerError] CRITICAL: Failed to load persistent store: \(error.localizedDescription), userInfo: \(error.userInfo)") // Placeholder
+                // In a real app, you might set a global error state here to inform the UI.
+                // For example: AppErrorManager.shared.reportFatalError(error)
             }
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
 
-    func saveContext() {
+    func saveContext() async throws {
         let context = container.viewContext
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+        try await context.perform { // Ensure operations are on the context's queue
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    // logger.error("Failed to save context: \(error.localizedDescription), userInfo: \((error as NSError).userInfo)")
+                    print("[PersistenceControllerError] Failed to save context: \(error.localizedDescription), userInfo: \((error as NSError).userInfo)") // Placeholder
+                    throw error // Rethrow the error for the caller to handle
+                }
             }
         }
     }

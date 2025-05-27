@@ -53,6 +53,7 @@ class SpeechService: NSObject, SpeechServiceProtocol {
     private let speechSynthesizer = AVSpeechSynthesizer()
 
     // Speech-to-Text (STT)
+    private var recognizersCache: [String: SFSpeechRecognizer] = [:]
     private var speechRecognizer: SFSpeechRecognizer?
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
@@ -97,7 +98,9 @@ class SpeechService: NSObject, SpeechServiceProtocol {
             try audioSession.setCategory(.playback, mode: .spokenAudio, options: .duckOthers)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
-            errorSubject.send(.audioSessionError("Failed to set up audio session for playback: \(error.localizedDescription)"))
+            DispatchQueue.main.async { // Ensure UI updates on main
+                self.errorSubject.send(.audioSessionError("Failed to set up audio session for playback: \(error.localizedDescription)"))
+            }
             return
         }
 
@@ -108,18 +111,24 @@ class SpeechService: NSObject, SpeechServiceProtocol {
         
         // Check if voice is available
         if utterance.voice == nil {
-             errorSubject.send(.synthesizerError("Voice for language '\(language)' not available."))
-             return
+            DispatchQueue.main.async { // Ensure UI updates on main
+                 self.errorSubject.send(.synthesizerError("Voice for language '\(language)' not available."))
+            }
+            return
         }
 
         speechSynthesizer.speak(utterance)
-        isSpeaking.send(true)
+        DispatchQueue.main.async { // Ensure UI updates on main for immediate feedback
+             self.isSpeaking.send(true)
+        }
     }
 
     func stopSpeaking() {
         if speechSynthesizer.isSpeaking {
             speechSynthesizer.stopSpeaking(at: .immediate)
-            isSpeaking.send(false) // Delegate method will also set this, but good for immediate feedback
+            DispatchQueue.main.async { // Ensure UI updates on main
+                self.isSpeaking.send(false) // Delegate method will also set this, but good for immediate feedback
+            }
         }
     }
 
@@ -136,15 +145,29 @@ class SpeechService: NSObject, SpeechServiceProtocol {
         }
         
         currentListeningLanguage = language
-
         let locale = Locale(identifier: language)
-        self.speechRecognizer = SFSpeechRecognizer(locale: locale)
 
-        guard let recognizer = speechRecognizer, recognizer.isAvailable else {
-            speechRecognizer = nil // Clear it if not available
+        if let cachedRecognizer = recognizersCache[language] {
+            self.speechRecognizer = cachedRecognizer
+            // Ensure delegate is still set, though it should be if we set it upon caching
+            self.speechRecognizer?.delegate = self 
+        } else {
+            guard let newRecognizer = SFSpeechRecognizer(locale: locale) else {
+                // This case might occur if the locale is invalid from the start
+                throw SpeechServiceError.speechRecognizerUnavailable 
+                // Or perhaps a more specific error like .invalidLanguage if SFSpeechRecognizer init with bad locale returns nil
+            }
+            newRecognizer.delegate = self
+            recognizersCache[language] = newRecognizer
+            self.speechRecognizer = newRecognizer
+        }
+
+        guard let recognizer = self.speechRecognizer, recognizer.isAvailable else {
+            recognizersCache[language] = nil // Remove if it became unavailable or was never available
+            self.speechRecognizer = nil
             throw SpeechServiceError.speechRecognizerUnavailable
         }
-        recognizer.delegate = self // Set delegate for availability changes
+        // recognizer.delegate is already set (either from cache or new)
 
         do {
             let audioSession = AVAudioSession.sharedInstance()
@@ -167,14 +190,22 @@ class SpeechService: NSObject, SpeechServiceProtocol {
             var isFinal = false
 
             if let result = result {
-                self.recognizedText.send(result.bestTranscription.formattedString)
+                let recognizedString = result.bestTranscription.formattedString
+                DispatchQueue.main.async { // Ensure UI updates on main
+                    self.recognizedText.send(recognizedString)
+                }
                 isFinal = result.isFinal
             }
 
             if error != nil || isFinal {
-                self.stopListeningInternal() // Clean up resources
+                // stopListeningInternal already handles isListening.send(false)
+                // and that should be on main if called from here.
+                // Let's ensure stopListeningInternal itself dispatches its isListening.send(false) to main.
+                self.stopListeningInternal() 
                 if let error = error {
-                    self.errorSubject.send(.recognitionTaskError(error.localizedDescription))
+                    DispatchQueue.main.async { // Ensure UI updates on main
+                        self.errorSubject.send(.recognitionTaskError(error.localizedDescription))
+                    }
                 }
             }
         }
@@ -187,8 +218,10 @@ class SpeechService: NSObject, SpeechServiceProtocol {
         audioEngine.prepare()
         do {
             try audioEngine.start()
-            isListening.send(true)
-            recognizedText.send("") // Clear previous text
+            DispatchQueue.main.async { // Ensure UI updates on main
+                self.isListening.send(true)
+                self.recognizedText.send("") // Clear previous text
+            }
         } catch {
             stopListeningInternal() // Clean up on error
             throw SpeechServiceError.audioEngineError("Could not start audio engine: \(error.localizedDescription)")
@@ -215,49 +248,57 @@ class SpeechService: NSObject, SpeechServiceProtocol {
             do {
                 try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
             } catch {
-                errorSubject.send(.audioSessionError("Failed to deactivate audio session: \(error.localizedDescription)"))
+                DispatchQueue.main.async { // Ensure UI updates on main
+                    self.errorSubject.send(.audioSessionError("Failed to deactivate audio session: \(error.localizedDescription)"))
+                }
             }
         }
-        isListening.send(false)
+        DispatchQueue.main.async { // Ensure UI updates on main
+            self.isListening.send(false)
+        }
     }
 }
 
 // MARK: - AVSpeechSynthesizerDelegate
 extension SpeechService: AVSpeechSynthesizerDelegate {
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
-        isSpeaking.send(true)
+        DispatchQueue.main.async { self.isSpeaking.send(true) }
     }
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        isSpeaking.send(false)
+        DispatchQueue.main.async { self.isSpeaking.send(false) }
         // Deactivate audio session if it was set for playback only by this service
-        do {
-            // Check if still listening, if so, don't deactivate playback session yet
-            if !isListening.value {
-                 try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        // and not currently listening (which would require the session for recording).
+        DispatchQueue.main.async { // Wrap check and potential error in main queue
+            if !self.isListening.value {
+                do {
+                    try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                } catch {
+                    self.errorSubject.send(.audioSessionError("Failed to deactivate audio session post-synthesis: \(error.localizedDescription)"))
+                }
             }
-        } catch {
-            errorSubject.send(.audioSessionError("Failed to deactivate audio session post-synthesis: \(error.localizedDescription)"))
         }
     }
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didPause utterance: AVSpeechUtterance) {
-        // isSpeaking.send(false) // Or a different state like .paused
+        // Example: DispatchQueue.main.async { self.isSpeaking.send(false) } // Or a different state like .paused
     }
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didContinue utterance: AVSpeechUtterance) {
-        // isSpeaking.send(true)
+        // Example: DispatchQueue.main.async { self.isSpeaking.send(true) }
     }
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        isSpeaking.send(false)
+        DispatchQueue.main.async { self.isSpeaking.send(false) }
         // Deactivate audio session similar to didFinish
-        do {
-             if !isListening.value {
-                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-             }
-        } catch {
-            errorSubject.send(.audioSessionError("Failed to deactivate audio session post-cancellation: \(error.localizedDescription)"))
+        DispatchQueue.main.async { // Wrap check and potential error in main queue
+            if !self.isListening.value {
+                do {
+                    try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                } catch {
+                    self.errorSubject.send(.audioSessionError("Failed to deactivate audio session post-cancellation: \(error.localizedDescription)"))
+                }
+            }
         }
     }
     
@@ -270,10 +311,13 @@ extension SpeechService: AVSpeechSynthesizerDelegate {
 extension SpeechService: SFSpeechRecognizerDelegate {
     func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
         if !available {
-            if isListening.value && speechRecognizer.locale.identifier == currentListeningLanguage {
-                // If currently listening with this recognizer and it becomes unavailable
-                stopListeningInternal()
-                errorSubject.send(.speechRecognizerUnavailable)
+            // currentListeningLanguage should be accessed on main if it's modified on main,
+            // or self should be captured on main. For safety:
+            DispatchQueue.main.async {
+                if self.isListening.value && speechRecognizer.locale.identifier == self.currentListeningLanguage {
+                    self.stopListeningInternal() // This will now dispatch its isListening.send to main
+                    self.errorSubject.send(.speechRecognizerUnavailable) // errorSubject should also be sent from main
+                }
             }
         }
     }
