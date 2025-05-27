@@ -9,29 +9,29 @@ enum LogLevel: String {
 }
 
 struct AppLogger { // Renamed to AppLogger to avoid potential conflicts with other Logger types
-    private static func log(level: LogLevel, message: String, file: String = #file, function: String = #function, line: UInt = #line) {
+    private static func log(level: LogLevel, message: String, tag: String? = nil, file: String = #file, function: String = #function, line: UInt = #line) {
         let fileName = (file as NSString).lastPathComponent
         // Simple format: LEVEL: [FileName:Line] FunctionName - Message
-        print("\(level.rawValue): [\(fileName):\(line)] \(function) - \(message)")
+        print("\(level.rawValue): [\(tag ?? fileName)] [\(function):\(line)] - \(message)")
     }
 
-    static func error(_ message: String, file: String = #file, function: String = #function, line: UInt = #line) {
-        log(level: .error, message: message, file: file, function: function, line: line)
+    static func error(_ message: String, tag: String? = nil, file: String = #file, function: String = #function, line: UInt = #line) {
+        log(level: .error, message: message, tag: tag, file: file, function: function, line: line)
     }
 
-    static func critical(_ message: String, file: String = #file, function: String = #function, line: UInt = #line) {
-        log(level: .critical, message: message, file: file, function: function, line: line)
+    static func critical(_ message: String, tag: String? = nil, file: String = #file, function: String = #function, line: UInt = #line) {
+        log(level: .critical, message: message, tag: tag, file: file, function: function, line: line)
     }
     
-    static func warning(_ message: String, file: String = #file, function: String = #function, line: UInt = #line) {
-        log(level: .warning, message: message, file: file, function: function, line: line)
+    static func warning(_ message: String, tag: String? = nil, file: String = #file, function: String = #function, line: UInt = #line) {
+        log(level: .warning, message: message, tag: tag, file: file, function: function, line: line)
     }
 
-    static func info(_ message: String, file: String = #file, function: String = #function, line: UInt = #line) {
-        log(level: .info, message: message, file: file, function: function, line: line)
+    static func info(_ message: String, tag: String? = nil, file: String = #file, function: String = #function, line: UInt = #line) {
+        log(level: .info, message: message, tag: tag, file: file, function: function, line: line)
     }
 
-    static func debug(_ message: String, file: String = #file, function: String = #function, line: UInt = #line) {
-        log(level: .debug, message: message, file: file, function: function, line: line)
+    static func debug(_ message: String, tag: String? = nil, file: String = #file, function: String = #function, line: UInt = #line) {
+        log(level: .debug, message: message, tag: tag, file: file, function: function, line: line)
     }
 }

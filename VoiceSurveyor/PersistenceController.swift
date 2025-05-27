@@ -63,7 +63,7 @@ struct PersistenceController {
             try viewContext.save()
         } catch {
             let nsError = error as NSError
-            AppLogger.error("Failed to save preview context: \(nsError.localizedDescription), userInfo: \(nsError.userInfo)")
+            AppLogger.error("Failed to save preview context: \(nsError.localizedDescription), userInfo: \(nsError.userInfo)", tag: "PersistenceController")
             // Depending on how critical previews are, one might still choose to fatalError for dev experience.
             // For this task, we're removing fatalError.
         }
@@ -79,7 +79,7 @@ struct PersistenceController {
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                AppLogger.critical("Failed to load persistent store: \(error.localizedDescription), userInfo: \(error.userInfo)")
+                AppLogger.critical("Failed to load persistent store: \(error.localizedDescription), userInfo: \(error.userInfo)", tag: "PersistenceController")
                 // In a real app, you might set a global error state here to inform the UI.
                 // For example: AppErrorManager.shared.reportFatalError(error)
             }
@@ -94,7 +94,7 @@ struct PersistenceController {
                 do {
                     try context.save()
                 } catch {
-                    AppLogger.error("Failed to save context: \(error.localizedDescription), userInfo: \((error as NSError).userInfo)")
+                    AppLogger.error("Failed to save context: \(error.localizedDescription), userInfo: \((error as NSError).userInfo)", tag: "PersistenceController")
                     throw error // Rethrow the error for the caller to handle
                 }
             }

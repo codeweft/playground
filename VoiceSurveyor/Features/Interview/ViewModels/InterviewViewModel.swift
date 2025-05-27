@@ -143,7 +143,7 @@ class InterviewViewModel: ObservableObject {
         speechService.errorSubject
             .sink { [weak self] error in
                 guard let self = self else { return }
-                AppLogger.error("SpeechService error: \(error.localizedDescription)")
+                AppLogger.error("SpeechService error: \(error.localizedDescription)", tag: "InterviewViewModel")
                 self.interviewState = .error(message: error.localizedDescription)
             }
             .store(in: &cancellables)

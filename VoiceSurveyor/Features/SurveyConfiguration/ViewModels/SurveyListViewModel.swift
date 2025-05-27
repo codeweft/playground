@@ -22,7 +22,7 @@ class SurveyListViewModel: ObservableObject {
         do {
             surveys = try await persistenceService.fetchSurveys(searchTerm: searchTerm, sortDescriptor: sortDescriptor)
         } catch {
-            AppLogger.error("Error fetching surveys: \(error.localizedDescription)")
+            AppLogger.error("Error fetching surveys: \(error.localizedDescription)", tag: "SurveyListVM")
             self.errorMessage = "Failed to fetch surveys: \(error.localizedDescription)"
             surveys = [] // Ensure consistent state on error
         }
@@ -36,7 +36,7 @@ class SurveyListViewModel: ObservableObject {
             do {
                 try await persistenceService.deleteSurvey(survey: survey)
             } catch {
-                AppLogger.error("Error deleting survey '\(survey.title ?? "Untitled")': \(error.localizedDescription)")
+                AppLogger.error("Error deleting survey '\(survey.title ?? "Untitled")': \(error.localizedDescription)", tag: "SurveyListVM")
                 self.errorMessage = "Failed to delete survey '\(survey.title ?? "Untitled")': \(error.localizedDescription)"
                 // anErrorOccurred = true // Mark that an error occurred
             }
@@ -50,7 +50,7 @@ class SurveyListViewModel: ObservableObject {
             try await persistenceService.deleteSurvey(survey: survey)
             // await fetchSurveys() // Refresh - moved to finally-like common call
         } catch {
-            AppLogger.error("Error deleting survey '\(survey.title ?? "Untitled")': \(error.localizedDescription)")
+            AppLogger.error("Error deleting survey '\(survey.title ?? "Untitled")': \(error.localizedDescription)", tag: "SurveyListVM")
             self.errorMessage = "Failed to delete survey '\(survey.title ?? "Untitled")': \(error.localizedDescription)"
         }
         await fetchSurveys() // Ensure fetchSurveys is called regardless of success/failure of delete

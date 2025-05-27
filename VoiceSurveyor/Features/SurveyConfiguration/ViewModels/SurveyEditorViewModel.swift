@@ -136,7 +136,7 @@ class SurveyEditorViewModel: ObservableObject {
             try await persistenceService.saveContext() // Commit all changes
 
         } catch {
-            print("Error saving survey: \(error)")
+            AppLogger.error("Error saving survey: \(error.localizedDescription)", tag: "SurveyEditorVM")
             // Handle error appropriately (e.g., show alert to user)
         }
     }
