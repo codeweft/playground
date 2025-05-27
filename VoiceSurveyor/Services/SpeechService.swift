@@ -59,9 +59,11 @@ class SpeechService: NSObject, SpeechServiceProtocol {
     private var recognitionTask: SFSpeechRecognitionTask?
     private let audioEngine = AVAudioEngine()
     
+    private let defaultLanguageCode: String
     private var currentListeningLanguage: String?
 
-    override init() {
+    init(defaultLanguage: String = "en-US") { // Allow customization, default to en-US
+        self.defaultLanguageCode = defaultLanguage
         super.init()
         speechSynthesizer.delegate = self
     }
@@ -83,7 +85,8 @@ class SpeechService: NSObject, SpeechServiceProtocol {
     }
 
     // MARK: - Text-to-Speech (TTS)
-    func speak(text: String, language: String = "en-US", rate: Float = AVSpeechUtteranceDefaultSpeechRate, pitch: Float = 1.0) {
+    func speak(text: String, language: String? = nil, rate: Float = AVSpeechUtteranceDefaultSpeechRate, pitch: Float = 1.0) {
+        let effectiveLanguage = language ?? self.defaultLanguageCode
         if isListening.value {
             print("SpeechService: Stopping listening before speaking.")
             stopListeningInternal() // Stop listening if active
@@ -105,14 +108,14 @@ class SpeechService: NSObject, SpeechServiceProtocol {
         }
 
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: language)
+        utterance.voice = AVSpeechSynthesisVoice(language: effectiveLanguage)
         utterance.rate = rate
         utterance.pitchMultiplier = pitch
         
         // Check if voice is available
         if utterance.voice == nil {
             DispatchQueue.main.async { // Ensure UI updates on main
-                 self.errorSubject.send(.synthesizerError("Voice for language '\(language)' not available."))
+                 self.errorSubject.send(.synthesizerError("Voice for language '\(effectiveLanguage)' not available."))
             }
             return
         }
@@ -133,7 +136,8 @@ class SpeechService: NSObject, SpeechServiceProtocol {
     }
 
     // MARK: - Speech-to-Text (STT)
-    func startListening(language: String = "en-US") throws {
+    func startListening(language: String? = nil) throws {
+        let effectiveLanguage = language ?? self.defaultLanguageCode
         if speechSynthesizer.isSpeaking {
             print("SpeechService: Stopping speaking before listening.")
             stopSpeaking() // Stop TTS if active
@@ -144,10 +148,10 @@ class SpeechService: NSObject, SpeechServiceProtocol {
             stopListeningInternal()
         }
         
-        currentListeningLanguage = language
-        let locale = Locale(identifier: language)
+        currentListeningLanguage = effectiveLanguage
+        let locale = Locale(identifier: effectiveLanguage)
 
-        if let cachedRecognizer = recognizersCache[language] {
+        if let cachedRecognizer = recognizersCache[effectiveLanguage] {
             self.speechRecognizer = cachedRecognizer
             // Ensure delegate is still set, though it should be if we set it upon caching
             self.speechRecognizer?.delegate = self 
@@ -158,12 +162,12 @@ class SpeechService: NSObject, SpeechServiceProtocol {
                 // Or perhaps a more specific error like .invalidLanguage if SFSpeechRecognizer init with bad locale returns nil
             }
             newRecognizer.delegate = self
-            recognizersCache[language] = newRecognizer
+            recognizersCache[effectiveLanguage] = newRecognizer
             self.speechRecognizer = newRecognizer
         }
 
         guard let recognizer = self.speechRecognizer, recognizer.isAvailable else {
-            recognizersCache[language] = nil // Remove if it became unavailable or was never available
+            recognizersCache[effectiveLanguage] = nil // Remove if it became unavailable or was never available
             self.speechRecognizer = nil
             throw SpeechServiceError.speechRecognizerUnavailable
         }

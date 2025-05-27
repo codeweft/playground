@@ -4,6 +4,12 @@ enum QuestionType: String, CaseIterable, Codable {
     case multipleChoice = "Multiple Choice"
     case singleChoice = "Single Choice"
     case openEnded = "Open Ended"
+
+    var localizedDescription: String {
+        // TODO: Replace self.rawValue with NSLocalizedString for actual localization.
+        // For example: return NSLocalizedString(self.rawValue, comment: "Question type display name")
+        return self.rawValue
+    }
 }
 
 protocol PersistenceServiceProtocol {
