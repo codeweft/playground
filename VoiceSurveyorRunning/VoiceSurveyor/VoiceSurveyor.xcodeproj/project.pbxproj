@@ -29,9 +29,22 @@
 		BA5E4F922DE61AA400237029 /* VoiceSurveyorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoiceSurveyorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BAC43C0F2DE6232900F1E45A /* Exceptions for "VoiceSurveyor" folder in "VoiceSurveyor" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				VoiceSurveyorApp.swift,
+			);
+			target = BA5E4F722DE61AA200237029 /* VoiceSurveyor */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BA5E4F752DE61AA200237029 /* VoiceSurveyor */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BAC43C0F2DE6232900F1E45A /* Exceptions for "VoiceSurveyor" folder in "VoiceSurveyor" target */,
+			);
 			path = VoiceSurveyor;
 			sourceTree = "<group>";
 		};
