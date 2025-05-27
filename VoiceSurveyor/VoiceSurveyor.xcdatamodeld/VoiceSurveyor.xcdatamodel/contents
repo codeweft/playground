@@ -1,9 +1,57 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
-    <entity name="Item" representedClassName="Item" syncable="YES" codeGenerationType="class">
-        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+
+    <!-- Entity: Survey -->
+    <entity name="Survey" representedClassName="Survey" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" />
+        <attribute name="title" optional="NO" attributeType="String" />
+        <attribute name="createdAt" optional="NO" attributeType="Date" />
+        <relationship name="questions" optional="YES" maxCount="0" minCount="0" toMany="YES" ordered="YES" deletionRule="Cascade" destinationEntity="Question" inverseName="survey" inverseEntity="Survey"/>
+        <relationship name="surveyResponses" optional="YES" maxCount="0" minCount="0" toMany="YES" ordered="NO" deletionRule="Cascade" destinationEntity="SurveyResponse" inverseName="survey" inverseEntity="Survey"/>
     </entity>
+
+    <!-- Entity: Question -->
+    <entity name="Question" representedClassName="Question" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" />
+        <attribute name="text" optional="NO" attributeType="String" />
+        <attribute name="type" optional="NO" attributeType="String" />
+        <attribute name="options" optional="YES" attributeType="String" />
+        <attribute name="order" optional="NO" attributeType="Integer 16" />
+        <relationship name="survey" optional="YES" toMany="NO" deletionRule="Nullify" destinationEntity="Survey" inverseName="questions" inverseEntity="Question" />
+    </entity>
+
+    <!-- Entity: Participant -->
+    <entity name="Participant" representedClassName="Participant" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" />
+        <attribute name="name" optional="NO" attributeType="String" />
+        <attribute name="details" optional="YES" attributeType="String" />
+        <relationship name="surveyResponses" optional="YES" maxCount="0" minCount="0" toMany="YES" ordered="NO" deletionRule="Nullify" destinationEntity="SurveyResponse" inverseName="participant" inverseEntity="Participant" />
+    </entity>
+
+    <!-- Entity: SurveyResponse -->
+    <entity name="SurveyResponse" representedClassName="SurveyResponse" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" />
+        <attribute name="interviewDate" optional="NO" attributeType="Date" />
+        <relationship name="participant" optional="YES" toMany="NO" deletionRule="Nullify" destinationEntity="Participant" inverseName="surveyResponses" inverseEntity="SurveyResponse" />
+        <relationship name="survey" optional="YES" toMany="NO" deletionRule="Nullify" destinationEntity="Survey" inverseName="surveyResponses" inverseEntity="SurveyResponse" />
+        <relationship name="individualResponses" optional="YES" maxCount="0" minCount="0" toMany="YES" ordered="NO" deletionRule="Cascade" destinationEntity="IndividualResponse" inverseName="surveyResponse" inverseEntity="SurveyResponse" />
+    </entity>
+
+    <!-- Entity: IndividualResponse -->
+    <entity name="IndividualResponse" representedClassName="IndividualResponse" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" />
+        <attribute name="questionText" optional="NO" attributeType="String" />
+        <attribute name="responseText" optional="NO" attributeType="String" />
+        <attribute name="questionType" optional="NO" attributeType="String" />
+        <relationship name="surveyResponse" optional="YES" toMany="NO" deletionRule="Nullify" destinationEntity="SurveyResponse" inverseName="individualResponses" inverseEntity="IndividualResponse" />
+    </entity>
+
     <elements>
-        <element name="Item" positionX="-63" positionY="-18" width="128" height="44"/>
+        <element name="Survey" positionX="-200" positionY="0" width="120" height="44"/>
+        <element name="Question" positionX="-50" positionY="0" width="120" height="44"/>
+        <element name="Participant" positionX="100" positionY="0" width="120" height="44"/>
+        <element name="SurveyResponse" positionX="250" positionY="0" width="120" height="44"/>
+        <element name="IndividualResponse" positionX="400" positionY="0" width="140" height="44"/>
     </elements>
+
 </model>
