@@ -1,0 +1,13 @@
+body {
+    margin: 0;
+    overflow: hidden; /* Hide scrollbars if canvas is larger than viewport */
+    background-color: #111; /* Dark background for the animation */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+canvas {
+    display: block; /* Removes extra space below the canvas */
+}
