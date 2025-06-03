@@ -82,7 +82,7 @@ export default function App() {
       } catch (error) {
         console.error('Error handling incoming signal:', error);
         setStatus('WebRTC signaling error');
-        Alert.alert('Signaling Error', \`Failed to process signal: \${error.message}\`);
+        Alert.alert('Signaling Error', `Failed to process signal: ${error.message}`);
       }
     });
 
@@ -105,7 +105,7 @@ export default function App() {
             sound.current.setOnPlaybackStatusUpdate((playbackStatus) => {
                 if (!playbackStatus.isLoaded) {
                     if (playbackStatus.error) {
-                        console.error(\`Playback Error: \${playbackStatus.error}\`);
+                        console.error(`Playback Error: ${playbackStatus.error}`);
                         Alert.alert('Playback Error', playbackStatus.error);
                         setIsPlaying(false);
                         setStatus('Playback error');
@@ -124,7 +124,7 @@ export default function App() {
             setIsPlaying(true);
         } catch (e) {
             console.error('Error loading/playing sound:', e);
-            Alert.alert('Playback Error', \`Failed to load or play audio: \${e.message}\`);
+            Alert.alert('Playback Error', `Failed to load or play audio: ${e.message}`);
             setStatus('Playback error');
             setIsPlaying(false);
             await sound.current.unloadAsync();
@@ -186,7 +186,7 @@ export default function App() {
           setStatus('Stream closed');
           break;
         default:
-          setStatus(\`ICE: \${pc.iceConnectionState}\`);
+          setStatus(`ICE: ${pc.iceConnectionState}`);
       }
     };
 

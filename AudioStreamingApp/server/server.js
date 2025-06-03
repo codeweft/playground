@@ -43,7 +43,7 @@ io.on('connection', (socket) => {
         console.log('Created RTCPeerConnection for', socket.id);
         // Placeholder for handling incoming track and "saving" it
         peerConnections[socket.id].ontrack = (event) => {
-          console.log(\`Audio track received from \${socket.id}. Track kind: \${event.track.kind}\`);
+          console.log(`Audio track received from ${socket.id}. Track kind: ${event.track.kind}`);
           // In a real scenario, this track would be processed and saved.
           // For now, we just log it. The playback will use a pre-existing sample file.
         };
@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
     };
 
     pc.oniceconnectionstatechange = () => {
-        console.log(\`ICE connection state for \${socket.id}: \${pc.iceConnectionState}\`);
+        console.log(`ICE connection state for ${socket.id}: ${pc.iceConnectionState}`);
     };
 
     try {
@@ -94,15 +94,15 @@ io.on('connection', (socket) => {
   socket.on('requestPlayback', (req) => { // Added req to access headers if needed, though not used in this simplified version
     console.log('Client requested playback:', socket.id);
     if (fs.existsSync(samplePlaybackFile)) {
-        // const playbackUrl = \`http://\${req.headers.host || 'localhost:3000'}/audio/playback.opus\`; // Construct URL dynamically
+        // const playbackUrl = `http://${req.headers.host || 'localhost:3000'}/audio/playback.opus`; // Construct URL dynamically
         // It's better if the client knows the base URL and we just send the path
         // Or the client constructs the full URL based on its server connection info.
         // For now, let's send a relative path or a pre-agreed filename.
         // Client will construct: SERVER_URL + /audio/playback.opus
-        console.log(\`Informing client about playback availability at /audio/playback.opus\`);
+        console.log(`Informing client about playback availability at /audio/playback.opus`);
         socket.emit('playbackReady', { streamUrl: '/audio/playback.opus', fileName: 'sample.opus' });
     } else {
-        console.log(\`Sample audio file \${samplePlaybackFile} does not exist.\`);
+        console.log(`Sample audio file ${samplePlaybackFile} does not exist.`);
         socket.emit('playbackError', { message: 'Sample audio file not found to play.' });
     }
   });
@@ -121,16 +121,16 @@ app.get('/', (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(\`Server listening on port \${PORT}\`);
+  console.log(`Server listening on port ${PORT}`);
   if (!fs.existsSync(samplePlaybackFile)) {
-    console.warn(\`Warning: Sample playback file \${samplePlaybackFile} does not exist. Playback will fail.\`);
+    console.warn(`Warning: Sample playback file ${samplePlaybackFile} does not exist. Playback will fail.`);
     // Attempt to create a dummy one if it's missing, for fallback.
     fs.writeFile(samplePlaybackFile, "Dummy Opus Data", (err) => {
         if (err) console.error("Failed to create dummy sample.opus:", err);
         else console.log("Created dummy sample.opus for playback testing.");
     });
   } else {
-    console.log(\`Sample playback file found: \${samplePlaybackFile}\`);
+    console.log(`Sample playback file found: ${samplePlaybackFile}`);
   }
 });
 
