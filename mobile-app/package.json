@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/react-native-webrtc": "^1.100.0"
+  },
+  "dependencies": {
+    "expo-av": "^15.1.4",
+    "expo-camera": "^16.1.6",
+    "react-native-webrtc": "^124.0.5"
+  }
+}
