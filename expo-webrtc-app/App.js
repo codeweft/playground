@@ -34,29 +34,27 @@ export default function App() {
     let audioPermissionGranted = false;
 
     try {
-      // Request Camera Permissions
       const cameraPermission = await Camera.requestCameraPermissionsAsync();
-      if (cameraPermission.status === 'granted') {
+      cameraPermissionGranted = cameraPermission.status === 'granted';
+      if (cameraPermissionGranted) {
         console.log('Camera permission granted');
-        cameraPermissionGranted = true;
       } else {
         console.log('Camera permission denied');
       }
 
-      // Request Audio Permissions
       const audioPermission = await Audio.requestPermissionsAsync();
-      if (audioPermission.status === 'granted') {
+      audioPermissionGranted = audioPermission.status === 'granted';
+      if (audioPermissionGranted) {
         console.log('Audio (microphone) permission granted');
-        audioPermissionGranted = true;
       } else {
         console.log('Audio (microphone) permission denied');
       }
 
       if (!cameraPermissionGranted || !audioPermissionGranted) {
         Alert.alert(
-          "Permissions Required",
-          "Camera and Microphone permissions are required to make a video call. Please grant them in app settings if you denied them.",
-          [{ text: "OK" }]
+          'Permissions Required',
+          'Camera and Microphone permissions are required to make a video call. Please grant them in app settings if you denied them.',
+          [{ text: 'OK' }]
         );
         return false;
       }
@@ -132,7 +130,7 @@ export default function App() {
 
     socket.current.onerror = (error) => {
       console.error('WebSocket error:', error);
-      Alert.alert("WebSocket Error", "Connection to server failed. Check console and ensure server is running.");
+      Alert.alert('WebSocket Error', 'Connection to server failed. Check console and ensure server is running.');
       setIsConnectedToServer(false);
     };
 
@@ -169,13 +167,16 @@ export default function App() {
       }
     };
 
-    // Add connection state logging
     peerConnection.current.onconnectionstatechange = () => {
-      console.log('Connection state:', peerConnection.current.connectionState);
+      if (peerConnection.current) {
+        console.log('Connection state:', peerConnection.current.connectionState);
+      }
     };
 
     peerConnection.current.oniceconnectionstatechange = () => {
-      console.log('ICE connection state:', peerConnection.current.iceConnectionState);
+      if (peerConnection.current) {
+        console.log('ICE connection state:', peerConnection.current.iceConnectionState);
+      }
     };
 
     console.log('Peer connection created');
@@ -184,8 +185,7 @@ export default function App() {
   const getLocalMediaStream = async () => {
     try {
       console.log('Getting user media...');
-      
-      // More specific constraints for mobile
+
       const constraints = {
         audio: {
           echoCancellation: true,
@@ -196,29 +196,31 @@ export default function App() {
           width: { min: 640, ideal: 1280, max: 1920 },
           height: { min: 480, ideal: 720, max: 1080 },
           frameRate: { min: 15, ideal: 30, max: 30 },
-          facingMode: 'user', // Front camera
-        }
+          facingMode: 'user',
+        },
       };
 
       const stream = await mediaDevices.getUserMedia(constraints);
       console.log('Local stream obtained:', stream);
-      console.log('Stream tracks:', stream.getTracks().map(track => ({
-        kind: track.kind,
-        enabled: track.enabled,
-        readyState: track.readyState,
-        id: track.id
-      })));
-      
+      console.log(
+        'Stream tracks:',
+        stream.getTracks().map((track) => ({
+          kind: track.kind,
+          enabled: track.enabled,
+          readyState: track.readyState,
+          id: track.id,
+        }))
+      );
+
       return stream;
     } catch (error) {
       console.error('Error getting user media:', error);
-      
-      // Try with simpler constraints as fallback
+
       try {
         console.log('Trying with simpler constraints...');
         const fallbackStream = await mediaDevices.getUserMedia({
           audio: true,
-          video: true
+          video: true,
         });
         console.log('Fallback stream obtained:', fallbackStream);
         return fallbackStream;
@@ -234,7 +236,6 @@ export default function App() {
       isOfferer.current = amIOfferer;
       console.log('Initializing media and peer connection, isOfferer:', amIOfferer);
 
-      // Get local media stream
       if (!localStream) {
         const stream = await getLocalMediaStream();
         if (!stream) {
@@ -243,13 +244,11 @@ export default function App() {
         setLocalStream(stream);
       }
 
-      // Create peer connection
       if (!peerConnection.current) {
         createPeerConnection();
       }
 
-      // Add tracks to peer connection
-      const streamToUse = localStream || await getLocalMediaStream();
+      const streamToUse = localStream || (await getLocalMediaStream());
       if (streamToUse && peerConnection.current) {
         console.log('Adding tracks to peer connection...');
         streamToUse.getTracks().forEach((track, index) => {
@@ -257,25 +256,25 @@ export default function App() {
             kind: track.kind,
             enabled: track.enabled,
             readyState: track.readyState,
-            id: track.id
+            id: track.id,
           });
           peerConnection.current.addTrack(track, streamToUse);
         });
-        
-        // Verify tracks were added
+
         const senders = peerConnection.current.getSenders();
         console.log('Peer connection senders:', senders.length);
         senders.forEach((sender, index) => {
           console.log(`Sender ${index}:`, {
-            track: sender.track ? {
-              kind: sender.track.kind,
-              enabled: sender.track.enabled,
-              readyState: sender.track.readyState
-            } : null
+            track: sender.track
+              ? {
+                  kind: sender.track.kind,
+                  enabled: sender.track.enabled,
+                  readyState: sender.track.readyState,
+                }
+              : null,
           });
         });
       }
-
     } catch (error) {
       console.error('Error in initializeMediaAndPeerConnection:', error);
       throw error;
@@ -285,16 +284,15 @@ export default function App() {
   const startCallHandler = async () => {
     try {
       console.log('Start Call button pressed');
-      
-      // Request permissions first
+
       const permissionsGranted = await requestPermissions();
       if (!permissionsGranted) {
-        Alert.alert("Permissions Required", "Camera and Microphone access is needed to start a call.");
+        Alert.alert('Permissions Required', 'Camera and Microphone access is needed to start a call.');
         return;
       }
 
       if (!isConnectedToServer) {
-        Alert.alert("Cannot Start Call", "Not connected to the signaling server.");
+        Alert.alert('Cannot Start Call', 'Not connected to the signaling server.');
         return;
       }
 
@@ -308,10 +306,10 @@ export default function App() {
           offerToReceiveAudio: true,
           offerToReceiveVideo: true,
         });
-        
+
         console.log('Setting local description...');
         await peerConnection.current.setLocalDescription(offer);
-        
+
         console.log('Sending offer...');
         sendMessage({ offer: offer });
       } else {
@@ -319,29 +317,33 @@ export default function App() {
       }
     } catch (error) {
       console.error('Error starting call:', error);
-      Alert.alert("Error", "Could not start the call: " + error.message);
+      Alert.alert('Error', 'Could not start the call: ' + error.message);
       setIsCallStarted(false);
     }
   };
 
   const hangUpCallHandler = (notifyPeer = true) => {
     console.log('Hanging up call...');
-    
+
     if (notifyPeer) {
       sendMessage({ hangup: true });
     }
 
     if (localStream) {
-      localStream.getTracks().forEach(track => {
+      localStream.getTracks().forEach((track) => {
         console.log('Stopping track:', track.kind);
         track.stop();
       });
-      localStream.release();
+      // localStream.release(); // Removed - not standard and may cause errors
     }
     setLocalStream(null);
     setRemoteStream(null);
 
     if (peerConnection.current) {
+      peerConnection.current.onicecandidate = null;
+      peerConnection.current.ontrack = null;
+      peerConnection.current.onconnectionstatechange = null;
+      peerConnection.current.oniceconnectionstatechange = null;
       peerConnection.current.close();
       peerConnection.current = null;
     }
@@ -354,56 +356,36 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>React Native WebRTC Demo</Text>
-      <Text style={styles.statusText}>
-        Server: {isConnectedToServer ? 'Connected' : 'Disconnected'}
-      </Text>
+      <Text style={styles.statusText}>Server: {isConnectedToServer ? 'Connected' : 'Disconnected'}</Text>
 
       <View style={styles.videoContainer}>
         <View style={styles.videoWrapper}>
           <Text style={styles.videoLabel}>Local Video</Text>
           {localStream ? (
-            <RTCView 
-              streamURL={localStream.toURL()} 
-              style={styles.video} 
-              objectFit={'cover'} 
-              mirror={true} 
-            />
-          ) : ( 
+            <RTCView streamURL={localStream.toURL()} style={styles.video} objectFit={'cover'} mirror={true} />
+          ) : (
             <View style={styles.videoPlaceholder}>
               <Text>No local stream</Text>
-            </View> 
+            </View>
           )}
         </View>
         <View style={styles.videoWrapper}>
           <Text style={styles.videoLabel}>Remote Video</Text>
           {remoteStream ? (
-            <RTCView 
-              streamURL={remoteStream.toURL()} 
-              style={styles.video} 
-              objectFit={'cover'} 
-              mirror={false} 
-            />
-          ) : ( 
+            <RTCView streamURL={remoteStream.toURL()} style={styles.video} objectFit={'cover'} mirror={false} />
+          ) : (
             <View style={styles.videoPlaceholder}>
               <Text>No remote stream</Text>
-            </View> 
+            </View>
           )}
         </View>
       </View>
 
       <View style={styles.buttonContainer}>
         {!isCallStarted ? (
-          <Button 
-            title="Start Call" 
-            onPress={startCallHandler} 
-            disabled={!isConnectedToServer || isCallStarted} 
-          />
+          <Button title="Start Call" onPress={startCallHandler} disabled={!isConnectedToServer || isCallStarted} />
         ) : (
-          <Button 
-            title="Hang Up" 
-            onPress={() => hangUpCallHandler(true)} 
-            color="red" 
-          />
+          <Button title="Hang Up" onPress={() => hangUpCallHandler(true)} color="red" />
         )}
       </View>
     </View>
