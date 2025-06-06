@@ -74,3 +74,6 @@ This project demonstrates a simple one-to-one video call using WebRTC and WebSoc
 
 
 npx http-server
+cd server && npm run start
+cd expo-webrtc-app && npx expo prebuild --clean && npx expo run:android
+update brave://flags/#unsafely-treat-insecure-origin-as-secure with ip+port for web 
