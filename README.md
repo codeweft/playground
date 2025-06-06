@@ -71,3 +71,6 @@ This project demonstrates a simple one-to-one video call using WebRTC and WebSoc
 -   This is a very basic demo. For production applications, you'd need a more robust signaling server, error handling, user management, STUN/TURN server configurations for NAT traversal, etc.
 -   The `ws://localhost:8080` URL in `script.js` assumes the signaling server is running on the same machine as the browser. If you run the server on a different machine, you'll need to change this URL to the server's IP address or hostname.
 -   For testing on different devices on the same network, ensure your firewall allows connections to port 8080 on the machine running the server.
+
+
+npx http-server

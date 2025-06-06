@@ -20,7 +20,7 @@ const configuration = {
 
 // --- Signaling (WebSocket) ---
 function setupWebSocket() {
-    websocket = new WebSocket('ws://localhost:8080');
+    websocket = new WebSocket('ws://192.168.1.108:8080');
 
     websocket.onopen = () => {
         console.log('WebSocket connection established');
