@@ -1,0 +1,66 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.videos {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+video {
+    width: 45%;
+    max-width: 640px;
+    height: auto;
+    border: 1px solid #ccc;
+    background-color: #000;
+    border-radius: 4px;
+}
+
+.controls {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    color: white;
+}
+
+#startButton {
+    background-color: #4CAF50; /* Green */
+}
+
+#startButton:hover {
+    background-color: #45a049;
+}
+
+#hangupButton {
+    background-color: #f44336; /* Red */
+}
+
+#hangupButton:hover {
+    background-color: #da190b;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
