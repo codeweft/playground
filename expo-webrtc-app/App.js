@@ -18,7 +18,7 @@ const SERVER_URL = 'ws://192.168.1.108:8080';
 const configuration = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.google.com:19302' }, // Typo fix: google.google.com to google.com
+    { urls: 'stun:stun1.l.google.com:19302' },
   ],
 };
 
@@ -83,15 +83,15 @@ export default function App() {
           'Camera and Microphone permissions are required to make a video call. Please grant them in app settings if you denied them.',
           [{ text: 'OK' }] // Provide an "OK" button
         );
-        console.warn('Camera or Audio permissions denied.');
+        console.warn('[Permissions] Camera or Audio permissions denied.');
         updateStatus('Permissions denied.');
         return false;
       }
-      console.log('Camera and Audio permissions granted.');
+      console.log('[Permissions] Camera and Audio permissions granted.');
       updateStatus('Permissions granted.');
       return true;
     } catch (error) {
-      console.error('Error requesting permissions:', error);
+      console.error('[Permissions] Error requesting permissions:', error);
       Alert.alert('Permission Error', 'Failed to request camera and microphone permissions.');
       updateStatus('Permission error.');
       return false;
@@ -122,11 +122,18 @@ export default function App() {
       const message = JSON.parse(event.data);
       console.log('[WebSocket] Message received:', message);
 
-      // If peerConnection is not yet established and we receive an offer or candidate,
-      // it means this peer is the answering party (receiver). Initialize everything.
-      if (!peerConnection.current && (message.offer || message.candidate)) {
-        console.log("[WebRTC Setup] PeerConnection not active, initializing for incoming message (answerer role).");
-        // Await this call to ensure media and PC are ready BEFORE processing the offer/candidate
+      // Only initialize peer connection and media for an incoming OFFER if not already done.
+      // Candidates received before an offer should be buffered without triggering full setup.
+      if (message.offer && !peerConnection.current) {
+        console.log("[WebRTC Setup] PeerConnection not active, initializing for incoming OFFER (answerer role).");
+        // Crucial: Request permissions BEFORE getting media and setting up peer connection
+        const permissionsGranted = await requestPermissions();
+        if (!permissionsGranted) {
+          console.error("[WebRTC Setup] Permissions not granted for incoming call. Aborting setup.");
+          updateStatus("Permissions denied for incoming call.");
+          return;
+        }
+
         const ready = await initializeMediaAndPeerConnection(false); // `false` indicates we are the answerer.
         if (ready) {
             setInCall(true); // Set call state if initialization for incoming call is successful
@@ -184,7 +191,7 @@ export default function App() {
         } else if (message.candidate) {
           console.log('[WebRTC] Received ICE candidate');
           if (peerConnection.current) {
-            // Only add candidate immediately if remoteDescription is set and signalingState is 'stable'.
+            // Only add candidate immediately if remoteDescription is set AND signalingState is 'stable'.
             // This prevents "InvalidStateError: setRemoteDescription has not been called".
             if (peerConnection.current.remoteDescription && peerConnection.current.remoteDescription.type && peerConnection.current.signalingState === 'stable') {
                 try {
@@ -254,6 +261,7 @@ export default function App() {
    */
   const createPeerConnection = () => {
     console.log('[WebRTC] Creating new RTCPeerConnection...');
+    // Ensure to use the full 'configuration' object which includes STUN servers.
     peerConnection.current = new RTCPeerConnection(configuration);
 
     // Event handler for when ICE candidates are generated
@@ -540,8 +548,8 @@ export default function App() {
         console.log(`[Cleanup] Stopping track: ${track.kind} - ${track.id}`);
         track.stop();
       });
+      setLocalStream(null); // Clear local stream state
     }
-    setLocalStream(null); // Clear local stream state
     setRemoteStream(null); // Clear remote stream state
 
     // Close the RTCPeerConnection and clear its references
