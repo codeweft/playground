@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Button, Text, PermissionsAndroid, Platform, Alert } from 'react-native';
+import { StyleSheet, View, Button, Text, Platform, Alert } from 'react-native';
 import {
   RTCPeerConnection,
   RTCView,
-  mediaDevices,
+  mediaDevices, // Still use this for getUserMedia
   RTCIceCandidate,
   RTCSessionDescription,
 } from 'react-native-webrtc';
+import { Camera } from 'expo-camera';
+import { Audio } from 'expo-av';
 
-const SERVER_URL = 'ws://localhost:8080'; // Ensure this is accessible from your app/emulator
+const SERVER_URL = 'ws://localhost:8080';
 
 const configuration = {
   iceServers: [
@@ -25,32 +27,65 @@ export default function App() {
 
   const peerConnection = useRef(null);
   const socket = useRef(null);
-  // To keep track if this peer is the one who initiated the call
   const isOfferer = useRef(false);
 
   const requestPermissions = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const grants = await PermissionsAndroid.requestMultiple([
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-        ]);
-        if (
-          grants[PermissionsAndroid.PERMISSIONS.CAMERA] === PermissionsAndroid.RESULTS.GRANTED &&
-          grants[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === PermissionsAndroid.RESULTS.GRANTED
-        ) {
-          return true;
-        } else {
-          Alert.alert("Permissions Denied", "Cannot start call without camera and microphone permissions.");
-          return false;
-        }
-      } catch (err) {
-        console.warn(err);
-        return false;
-      }
+    let cameraPermissionGranted = false;
+    let audioPermissionGranted = false;
+
+    // Request Camera Permissions
+    const cameraPermission = await Camera.requestCameraPermissionsAsync();
+    if (cameraPermission.status === 'granted') {
+      console.log('Camera permission granted');
+      cameraPermissionGranted = true;
+    } else {
+      console.log('Camera permission denied');
+    }
+
+    // Request Audio Permissions
+    // Note: expo-av's Audio.requestPermissionsAsync() is for microphone.
+    const audioPermission = await Audio.requestPermissionsAsync();
+    if (audioPermission.status === 'granted') {
+      console.log('Audio (microphone) permission granted');
+      audioPermissionGranted = true;
+    } else {
+      console.log('Audio (microphone) permission denied');
+    }
+
+    if (!cameraPermissionGranted || !audioPermissionGranted) {
+      Alert.alert(
+        "Permissions Required",
+        "Camera and Microphone permissions are required to make a video call. Please grant them in app settings if you denied them.",
+        [{ text: "OK" }]
+      );
+      return false;
     }
     return true;
   };
+
+  // Effect to request permissions when component mounts, if needed,
+  // or can be called explicitly before starting a call.
+  // For simplicity, we'll ensure it's called before call initiation.
+  useEffect(() => {
+    // Optionally, could check existing permissions here first
+    // const checkInitialPermissions = async () => {
+    //   const camStatus = await Camera.getCameraPermissionsAsync();
+    //   const audStatus = await Audio.getPermissionsAsync();
+    //   if(camStatus.status !== 'granted' || audStatus.status !== 'granted') {
+    //      // Maybe prompt user or show a button to grant permissions
+    //   }
+    // };
+    // checkInitialPermissions();
+    setupWebSocket(); // Initialize WebSocket connection on component mount
+
+    return () => { // Cleanup on component unmount
+      hangUpCallHandler(true);
+      if (socket.current) {
+        socket.current.close();
+      }
+    };
+  }, []);
+
 
   const setupWebSocket = () => {
     socket.current = new WebSocket(SERVER_URL);
@@ -65,9 +100,7 @@ export default function App() {
       console.log('WebSocket message received:', message);
 
       if (!peerConnection.current && (message.offer || message.candidate)) {
-         // If we receive an offer or candidate before PC is ready,
-         // it implies we are the callee. Initialize PC.
-        await initializeMediaAndPeerConnection(false); // false because we are not the offerer
+        await initializeMediaAndPeerConnection(false);
       }
 
       if (message.offer) {
@@ -102,7 +135,7 @@ export default function App() {
         }
       } else if (message.hangup) {
         console.log('Received hangup signal');
-        hangUpCallHandler(false); // false to not send another hangup message
+        hangUpCallHandler(false);
       }
     };
 
@@ -115,7 +148,6 @@ export default function App() {
     socket.current.onclose = () => {
       console.log('WebSocket connection closed');
       setIsConnectedToServer(false);
-      // Optionally, you might want to disable call buttons or show a message
     };
   };
 
@@ -133,13 +165,11 @@ export default function App() {
 
     peerConnection.current.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log('New ICE candidate:', event.candidate);
         sendMessage({ candidate: event.candidate });
       }
     };
 
     peerConnection.current.ontrack = (event) => {
-      console.log('Remote stream added:', event.streams[0]);
       if (event.streams && event.streams[0]) {
         setRemoteStream(event.streams[0]);
       }
@@ -147,31 +177,28 @@ export default function App() {
 
     if (localStream) {
       localStream.getTracks().forEach(track => {
-        console.log('Adding local track:', track.kind);
         peerConnection.current.addTrack(track, localStream);
       });
     }
   };
 
-  // Combined function to get media and initialize PC
   const initializeMediaAndPeerConnection = async (amIOfferer) => {
-    isOfferer.current = amIOfferer; // Set if this client is initiating the call
+    isOfferer.current = amIOfferer;
 
-    if (!localStream) { // Only get local stream if not already available
-        const stream = await mediaDevices.getUserMedia({
-            audio: true,
-            video: {
-            mandatory: { minWidth: 500, minHeight: 300, minFrameRate: 30 },
-            facingMode: 'user',
-            },
+    // Get local media stream using react-native-webrtc's mediaDevices
+    // after ensuring permissions with expo-camera/expo-av
+    if (!localStream) {
+        const stream = await mediaDevices.getUserMedia({ // Still use this from react-native-webrtc
+            audio: true, // expo-av Audio.requestPermissionsAsync handles mic permission
+            video: true, // expo-camera Camera.requestCameraPermissionsAsync handles cam permission
         });
         setLocalStream(stream);
-        console.log('Local stream obtained');
+        console.log('Local stream obtained via mediaDevices.getUserMedia');
     }
 
-    if (!peerConnection.current) { // Create PC if it doesn't exist
+    if (!peerConnection.current) {
         createPeerConnection();
-    } else { // If it exists, ensure tracks are added (might happen if localStream was set after PC creation)
+    } else {
         if (localStream && peerConnection.current.getLocalStreams().length === 0) {
              localStream.getTracks().forEach(track => {
                 peerConnection.current.addTrack(track, localStream);
@@ -181,9 +208,15 @@ export default function App() {
   };
 
   const startCallHandler = async () => {
+    // Request permissions first using Expo's APIs
     const permissionsGranted = await requestPermissions();
-    if (!permissionsGranted || !isConnectedToServer) {
-        Alert.alert("Cannot Start Call", "Ensure permissions are granted and you are connected to the server.");
+    if (!permissionsGranted) {
+        Alert.alert("Permissions Required", "Camera and Microphone access is needed to start a call.");
+        return;
+    }
+
+    if (!isConnectedToServer) {
+        Alert.alert("Cannot Start Call", "Not connected to the signaling server.");
         return;
     }
 
@@ -191,24 +224,21 @@ export default function App() {
     setIsCallStarted(true);
 
     try {
-      await initializeMediaAndPeerConnection(true); // true because this client is initiating
+      await initializeMediaAndPeerConnection(true);
 
       if (peerConnection.current) {
         const offer = await peerConnection.current.createOffer();
         await peerConnection.current.setLocalDescription(offer);
-        console.log('Offer created and set as local description');
         sendMessage({ offer: offer });
       }
     } catch (error) {
       console.error('Error starting call:', error);
       Alert.alert("Error", "Could not start the call: " + error.message);
       setIsCallStarted(false);
-      // cleanup logic might be needed here too
     }
   };
 
-  const hangUpCallHandler = (notifyPeer = true) => { // notifyPeer controls if hangup message is sent
-    console.log('Hang Up initiated.');
+  const hangUpCallHandler = (notifyPeer = true) => {
     if (notifyPeer) {
         sendMessage({ hangup: true });
     }
@@ -226,21 +256,9 @@ export default function App() {
     }
 
     setIsCallStarted(false);
-    isOfferer.current = false; // Reset offerer state
+    isOfferer.current = false;
     console.log('Call ended and resources cleaned up.');
   };
-
-  useEffect(() => {
-    requestPermissions();
-    setupWebSocket(); // Initialize WebSocket connection on component mount
-
-    return () => { // Cleanup on component unmount
-      hangUpCallHandler(true); // Send hangup if call is active
-      if (socket.current) {
-        socket.current.close();
-      }
-    };
-  }, []);
 
   return (
     <View style={styles.container}>
