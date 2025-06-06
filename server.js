@@ -6,7 +6,7 @@ const wss = new WebSocket.Server({ port: 8080 });
 // Store connected clients
 let clients = [];
 
-console.log('Signaling server started on ws://192.168.1.108:8080');
+console.log('Signaling server started on ws://localhost:8080');
 
 wss.on('connection', (ws) => {
     const clientId = clients.length; // Simple ID assignment
