@@ -1,0 +1,21 @@
+livekit-server --dev --bind 0.0.0.0
+
+lk token create \                
+--api-key devkey --api-secret secret \
+--join --room my-first-room --identity user1 \
+--valid-for 24h
+
+lk app list-templates  
+lk app create --template meet my-app
+
+frontend: 
+pnpm dev
+
+voice pipeline:
+pnpm build && node dist/agent.js dev
+
+
+ollama: 
+export OLLAMA_DEBUG=1
+ollama serve
+tail -f ~/.ollama/logs/server.log
