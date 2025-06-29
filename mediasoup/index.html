@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple WebRTC Demo (MediaSoup Alternative)</title>
+</head>
+<body>
+  <h1>Simple WebRTC Demo</h1>
+  <p><em>This is a direct WebRTC implementation that works without MediaSoup bundling</em></p>
+  
+  <div>
+    <h3>Local Video</h3>
+    <video id="localVideo" autoplay muted playsinline style="width: 300px; border: 1px solid black;"></video>
+  </div>
+  <div>
+    <h3>Remote Video</h3>
+    <video id="remoteVideo" autoplay playsinline style="width: 300px; border: 1px solid black;"></video>
+  </div>
+  <div>
+    <button id="startBtn">Start Camera</button>
+    <button id="connectBtn" disabled>Connect to Peer</button>
+    <button id="callBtn" disabled>Start Call</button>
+    <div id="status">Ready to start</div>
+  </div>
+
+  <script>
+    let ws;
+    let localStream;
+    let peerConnection;
+    let isInitiator = false;
+
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const startBtn = document.getElementById('startBtn');
+    const connectBtn = document.getElementById('connectBtn');
+    const callBtn = document.getElementById('callBtn');
+    const status = document.getElementById('status');
+
+    // STUN servers for NAT traversal
+    const configuration = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
+    function updateStatus(message) {
+      status.textContent = message;
+      console.log(message);
+    }
+
+    function initWebSocket() {
+      // Connect to your signaling server
+      ws = new WebSocket('ws://localhost:3000');
+      
+      ws.onopen = () => {
+        updateStatus('Connected to signaling server');
+        callBtn.disabled = false;
+      };
+
+      ws.onclose = () => {
+        updateStatus('Disconnected from signaling server');
+        callBtn.disabled = true;
+      };
+
+      ws.onerror = (err) => {
+        updateStatus('WebSocket error - check server connection');
+        console.error('WebSocket error:', err);
+      };
+
+      ws.onmessage = async (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          await handleSignalingMessage(message);
+        } catch (err) {
+          console.error('Error handling signaling message:', err);
+        }
+      };
+    }
+
+    function sendSignalingMessage(message) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(message));
+      } else {
+        console.error('WebSocket not connected');
+      }
+    }
+
+    async function handleSignalingMessage(message) {
+      switch (message.type) {
+        case 'offer':
+          await handleOffer(message.offer);
+          break;
+        case 'answer':
+          await handleAnswer(message.answer);
+          break;
+        case 'ice-candidate':
+          await handleIceCandidate(message.candidate);
+          break;
+        case 'ready':
+          // Another peer is ready
+          if (!isInitiator) {
+            updateStatus('Peer connected - you can start the call');
+          }
+          break;
+        default:
+          console.log('Unknown message type:', message.type);
+      }
+    }
+
+    async function startCamera() {
+      try {
+        // Check if mediaDevices is supported
+        if (!navigator.mediaDevices) {
+          throw new Error('mediaDevices not supported. This page must be served over HTTPS or localhost.');
+        }
+
+        // Check if getUserMedia is supported
+        if (!navigator.mediaDevices.getUserMedia) {
+          throw new Error('getUserMedia not supported in this browser.');
+        }
+
+        updateStatus('Requesting camera access...');
+        
+        localStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480 },
+          audio: true
+        });
+        
+        localVideo.srcObject = localStream;
+        updateStatus('Camera started successfully');
+        
+        startBtn.disabled = true;
+        connectBtn.disabled = false;
+        
+      } catch (error) {
+        let errorMessage = 'Error accessing camera: ' + error.message;
+        
+        // Provide specific guidance for common issues
+        if (error.name === 'NotAllowedError') {
+          errorMessage += '\nPlease allow camera/microphone access when prompted.';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage += '\nNo camera/microphone found on this device.';
+        } else if (error.message.includes('HTTPS')) {
+          errorMessage += '\n\nSOLUTION: Serve this page over HTTPS or localhost (e.g., http://localhost:8000)';
+        } else if (!navigator.mediaDevices) {
+          errorMessage += '\n\nSOLUTION: This page must be served over HTTPS or localhost for camera access.';
+        }
+        
+        updateStatus(errorMessage);
+        console.error('Error accessing media devices:', error);
+      }
+    }
+
+    function createPeerConnection() {
+      peerConnection = new RTCPeerConnection(configuration);
+
+      // Add local stream to peer connection
+      if (localStream) {
+        localStream.getTracks().forEach(track => {
+          peerConnection.addTrack(track, localStream);
+        });
+      }
+
+      // Handle remote stream
+      peerConnection.ontrack = (event) => {
+        const [remoteStream] = event.streams;
+        remoteVideo.srcObject = remoteStream;
+        updateStatus('Receiving remote video');
+      };
+
+      // Handle ICE candidates
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          sendSignalingMessage({
+            type: 'ice-candidate',
+            candidate: event.candidate
+          });
+        }
+      };
+
+      // Connection state changes
+      peerConnection.onconnectionstatechange = () => {
+        updateStatus('Connection state: ' + peerConnection.connectionState);
+      };
+    }
+
+    async function makeCall() {
+      if (!peerConnection) {
+        createPeerConnection();
+      }
+
+      try {
+        isInitiator = true;
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        
+        sendSignalingMessage({
+          type: 'offer',
+          offer: offer
+        });
+        
+        updateStatus('Call initiated - waiting for answer');
+        callBtn.disabled = true;
+        
+      } catch (error) {
+        updateStatus('Error creating offer: ' + error.message);
+        console.error('Error creating offer:', error);
+      }
+    }
+
+    async function handleOffer(offer) {
+      if (!peerConnection) {
+        createPeerConnection();
+      }
+
+      try {
+        await peerConnection.setRemoteDescription(offer);
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        
+        sendSignalingMessage({
+          type: 'answer',
+          answer: answer
+        });
+        
+        updateStatus('Answered call - establishing connection');
+        
+      } catch (error) {
+        updateStatus('Error handling offer: ' + error.message);
+        console.error('Error handling offer:', error);
+      }
+    }
+
+    async function handleAnswer(answer) {
+      try {
+        await peerConnection.setRemoteDescription(answer);
+        updateStatus('Answer received - establishing connection');
+      } catch (error) {
+        updateStatus('Error handling answer: ' + error.message);
+        console.error('Error handling answer:', error);
+      }
+    }
+
+    async function handleIceCandidate(candidate) {
+      try {
+        await peerConnection.addIceCandidate(candidate);
+      } catch (error) {
+        console.error('Error adding ICE candidate:', error);
+      }
+    }
+
+    // Event listeners
+    startBtn.addEventListener('click', startCamera);
+    
+    connectBtn.addEventListener('click', () => {
+      connectBtn.disabled = true;
+      updateStatus('Connecting to signaling server...');
+      initWebSocket();
+      
+      // Tell server we're ready
+      setTimeout(() => {
+        sendSignalingMessage({ type: 'ready' });
+      }, 1000);
+    });
+    
+    callBtn.addEventListener('click', makeCall);
+
+    // Initialize
+    function checkBrowserSupport() {
+      if (!navigator.mediaDevices) {
+        updateStatus('❌ Camera access requires HTTPS or localhost. Current URL: ' + window.location.href);
+        startBtn.disabled = true;
+        return false;
+      }
+      
+      if (!window.RTCPeerConnection) {
+        updateStatus('❌ WebRTC not supported in this browser');
+        startBtn.disabled = true;
+        return false;
+      }
+      
+      updateStatus('✅ Browser supported - Click "Start Camera" to begin');
+      return true;
+    }
+    
+    checkBrowserSupport();
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    div {
+      margin: 20px 0;
+    }
+    
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    #status {
+      font-weight: bold;
+      color: #333;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 5px;
+    }
+    
+    video {
+      display: block;
+      margin: 10px 0;
+    }
+  </style>
+</body>
+</html>
